@@ -1,0 +1,110 @@
+# Visual Studio によるビルド出力
+bin/
+obj/
+
+# Visual Studio のユーザ設定ファイル
+*.suo
+*.user
+*.userprefs
+*.sln.ide
+*.vcxproj.*
+
+# Visual Studio のワークスペースファイル
+.vs/
+
+# NuGet パッケージ
+*.nupkg
+*.snupkg
+packages/
+
+# .NET バイナリ
+*.dll
+*.exe
+*.exe.config
+*.jar
+*.ps1
+*.pdb
+*.mdb
+
+# パブリッシュ/デプロイ関連ファイル
+.publish/
+
+# ログファイル
+*.log
+
+# ローカルデータベース
+*.db
+*.mdf
+*.ldf
+
+# シークレットファイル
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+appsettings.json
+*credentials*.json
+*.key
+
+# IDE 設定ファイル
+.idea/
+.vscode/
+
+# Mac 特有のファイル
+.DS_Store
+
+# その他の OS 特有のファイル
+Thumbs.db
+ehthumbs.db
+
+# DotNetUser ファイル
+*.dotSettings.user
+
+# Test Results
+TestResults/
+
+# ジェネレートされたコードのアーティファクト
+Generated\
+
+# Resharper cache
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Rider などの IDE 設定
+*.sln.iml
+
+# Rider のワークスペース
+.idea/
+
+# サイトの公開設定
+.publishsettings
+*.pubxml
+*.pubxml.user
+
+# Visual Studio Code の設定
+.history/
+
+# Azure 関連
+.azure/
+
+# ローカルツール
+.local.toolsets/
+
+# 開発時にのみ使用する設定ファイル
+.env
+
+# 開発用コンテナ設定
+.devcontainer/
+
+# Coverage Results
+coverage/
+
+# エンティティモデルのデータベーススキーマ
+*.edmx.diagram
+*.edmx.sql
+*.tt
+
+# その他
+*.dbmdl
+*.jfm
+*.pfx
