@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>ec_site_backend_csharp</RootNamespace>
+    <RootNamespace>EcSiteBackend</RootNamespace>
   </PropertyGroup>
 
 </Project>
