@@ -1,0 +1,6 @@
+@EcSiteBackend.Presentation_HostAddress = http://localhost:5218
+
+GET {{EcSiteBackend.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
