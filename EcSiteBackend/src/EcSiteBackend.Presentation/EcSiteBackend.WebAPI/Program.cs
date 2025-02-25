@@ -1,10 +1,5 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using EcSiteBackend.Presentation.EcSiteBackend;
-
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 {
-
     public class Program
     {
         public static void Main(string[] args)
@@ -14,6 +9,9 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
