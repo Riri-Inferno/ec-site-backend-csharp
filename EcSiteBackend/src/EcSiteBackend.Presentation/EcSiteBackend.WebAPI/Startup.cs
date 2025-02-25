@@ -10,7 +10,7 @@
         }
         
         // 仮置き
-        private class Query
+        public class Query
         {
             public string Hello() => "Hello, GraphQL!";
         }
