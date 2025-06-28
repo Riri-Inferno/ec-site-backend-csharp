@@ -47,9 +47,9 @@ namespace EcSiteBackend.Domain.Entities
 
         // Navigation Properties
         /// <summary>
-        /// TODO:ユーザーロールのコレクション
+        /// ユーザーロールのコレクション
         /// </summary>
-        // public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
         /// <summary>
         /// TODO:ユーザー住所のコレクション
