@@ -1,3 +1,5 @@
+using EcSiteBackend.Domain.Enums;
+
 namespace EcSiteBackend.Domain.Entities
 {
     /// <summary>
@@ -49,6 +51,6 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 関連注文
         /// </summary>
-        public virtual Order? RelatedOrder { get; set; }
+        // public virtual Order? RelatedOrder { get; set; }
     }
 }
