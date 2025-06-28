@@ -16,6 +16,13 @@ namespace EcSiteBackend.Infrastructure.DbContext
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<UserAddress> UserAddresses { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductHistory> ProductHistories { get; set; }
+        public DbSet<Stock> Stocks { get; set; }
+        public DbSet<StockHistory> StockHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -97,13 +104,13 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.AddressLine1).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.AddressLine2).HasMaxLength(100);
                 entity.Property(e => e.PhoneNumber).HasMaxLength(20).IsRequired();
-                
+
                 // UserとUserAddressのリレーション（1対多）
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.UserAddresses)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -117,16 +124,154 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.UsedIpAddress).HasMaxLength(45);
                 entity.HasIndex(e => e.TokenHash);
                 entity.HasIndex(e => new { e.UserId, e.ExpiresAt });
-                
+
                 // UserとPasswordResetTokenのリレーション（1対多）
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.PasswordResetTokens)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // Category
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.ToTable("categories");
+                entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Slug).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.ImageUrl).HasMaxLength(500);
+                entity.HasIndex(e => e.Slug).IsUnique();
+                
+                // 自己参照のリレーション
+                entity.HasOne(e => e.ParentCategory)
+                    .WithMany(e => e.ChildCategories)
+                    .HasForeignKey(e => e.ParentCategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
                 
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
+
+            // ProductCategory（多対多の中間テーブル）
+            modelBuilder.Entity<ProductCategory>(entity =>
+            {
+                entity.ToTable("product_categories");
+                entity.HasKey(e => new { e.ProductId, e.CategoryId });
+                
+                // ProductとProductCategoryのリレーション（1対多）
+                entity.HasOne(e => e.Product)
+                    .WithMany(p => p.ProductCategories)
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // CategoryとProductCategoryのリレーション（1対多）
+                entity.HasOne(e => e.Category)
+                    .WithMany(c => c.ProductCategories)
+                    .HasForeignKey(e => e.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ProductImage
+            modelBuilder.Entity<ProductImage>(entity =>
+            {
+                entity.ToTable("product_images");
+                entity.Property(e => e.ImageUrl).HasMaxLength(500).IsRequired();
+                entity.Property(e => e.ThumbnailUrl).HasMaxLength(500);
+                entity.Property(e => e.Title).HasMaxLength(200);
+                entity.Property(e => e.AltText).HasMaxLength(200);
+                
+                // ProductとProductImageのリレーション（1対多）
+                entity.HasOne(e => e.Product)
+                    .WithMany(p => p.ProductImages)
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // Product
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.ToTable("products");
+                entity.Property(e => e.Sku).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.Price).HasPrecision(10, 2);
+                entity.Property(e => e.CostPrice).HasPrecision(10, 2);
+                entity.Property(e => e.ListPrice).HasPrecision(10, 2);
+                entity.Property(e => e.MetaTitle).HasMaxLength(100);
+                entity.Property(e => e.MetaDescription).HasMaxLength(200);
+                entity.Property(e => e.Slug).HasMaxLength(200).IsRequired();
+                
+                entity.HasIndex(e => e.Sku).IsUnique();
+                entity.HasIndex(e => e.Slug).IsUnique();
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.IsPublished);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // ProductHistory
+            modelBuilder.Entity<ProductHistory>(entity =>
+            {
+                entity.ToTable("product_histories");
+                entity.Property(e => e.Sku).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.Price).HasPrecision(10, 2);
+                entity.Property(e => e.CostPrice).HasPrecision(10, 2);
+                entity.Property(e => e.ListPrice).HasPrecision(10, 2);
+                
+                entity.HasIndex(e => e.OriginalId);
+                entity.HasIndex(e => e.OperatedAt);
+                
+                entity.HasOne(e => e.OriginalProduct)
+                    .WithMany()
+                    .HasForeignKey(e => e.OriginalId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Stock
+            modelBuilder.Entity<Stock>(entity =>
+            {
+                entity.ToTable("stocks");
+                entity.HasIndex(e => e.ProductId).IsUnique();
+                
+                entity.HasOne(e => e.Product)
+                    .WithOne(p => p.Stock)
+                    .HasForeignKey<Stock>(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // StockHistory
+            modelBuilder.Entity<StockHistory>(entity =>
+            {
+                entity.ToTable("stock_histories");
+                entity.Property(e => e.Note).HasMaxLength(500);
+                
+                entity.HasIndex(e => e.StockId);
+                entity.HasIndex(e => e.OperatedAt);
+                entity.HasIndex(e => e.MovementType);
+                
+                entity.HasOne(e => e.Stock)
+                    .WithMany(s => s.StockHistories)
+                    .HasForeignKey(e => e.StockId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.RelatedOrder)
+                    .WithMany()
+                    .HasForeignKey(e => e.RelatedOrderId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
         }
     }
 }
