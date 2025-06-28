@@ -25,6 +25,10 @@ namespace EcSiteBackend.Infrastructure.DbContext
         public DbSet<StockHistory> StockHistories { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderHistory> OrderHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -268,12 +272,10 @@ namespace EcSiteBackend.Infrastructure.DbContext
                     .HasForeignKey(e => e.StockId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-
-                // TODO:未作成
-                // entity.HasOne(e => e.RelatedOrder)
-                //     .WithMany()
-                //     .HasForeignKey(e => e.RelatedOrderId)
-                //     .OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(e => e.RelatedOrder)
+                    .WithMany()
+                    .HasForeignKey(e => e.RelatedOrderId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Cart
@@ -281,17 +283,17 @@ namespace EcSiteBackend.Infrastructure.DbContext
             {
                 entity.ToTable("carts");
                 entity.Property(e => e.SessionId).HasMaxLength(100);
-                
+
                 // UserとCartの1対1リレーション
                 entity.HasOne(e => e.User)
                     .WithOne(u => u.Cart)
                     .HasForeignKey<Cart>(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 entity.HasIndex(e => e.UserId).IsUnique();
                 entity.HasIndex(e => e.SessionId);
                 entity.HasIndex(e => e.LastActivityAt);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -301,24 +303,127 @@ namespace EcSiteBackend.Infrastructure.DbContext
             {
                 entity.ToTable("cart_items");
                 entity.Property(e => e.PriceAtAdded).HasPrecision(10, 2);
-                
+
                 // CartとCartItemのリレーション（1対多）
                 entity.HasOne(e => e.Cart)
                     .WithMany(c => c.CartItems)
                     .HasForeignKey(e => e.CartId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 // ProductとCartItemのリレーション（1対多）
                 entity.HasOne(e => e.Product)
                     .WithMany(p => p.CartItems)
                     .HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Restrict);
-                
+
                 // 同じ商品を重複して追加できないようにする
                 entity.HasIndex(e => new { e.CartId, e.ProductId }).IsUnique();
+
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // OrderItem
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.ToTable("order_items");
+                entity.Property(e => e.ProductName).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.ProductSku).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.UnitPrice).HasPrecision(10, 2);
+                entity.Property(e => e.DiscountAmount).HasPrecision(10, 2);
+                entity.Property(e => e.TaxAmount).HasPrecision(10, 2);
+
+                entity.HasOne(e => e.Order)
+                    .WithMany(o => o.OrderItems)
+                    .HasForeignKey(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Product)
+                    .WithMany(p => p.OrderItems)
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // OrderStatusHistory
+            modelBuilder.Entity<OrderStatusHistory>(entity =>
+            {
+                entity.ToTable("order_status_histories");
+                entity.Property(e => e.Reason).HasMaxLength(200);
+                entity.Property(e => e.Note).HasMaxLength(500);
+
+                entity.HasOne(e => e.Order)
+                    .WithMany(o => o.OrderStatusHistories)
+                    .HasForeignKey(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.CreatedAt);
+
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.ToTable("orders");
+                entity.Property(e => e.OrderNumber).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.SubTotal).HasPrecision(10, 2);
+                entity.Property(e => e.DiscountAmount).HasPrecision(10, 2);
+                entity.Property(e => e.TaxAmount).HasPrecision(10, 2);
+                entity.Property(e => e.ShippingFee).HasPrecision(10, 2);
+                entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
+                entity.Property(e => e.CustomerNote).HasMaxLength(500);
+                entity.Property(e => e.AdminNote).HasMaxLength(500);
+                entity.Property(e => e.CouponCode).HasMaxLength(50);
+                
+                entity.HasIndex(e => e.OrderNumber).IsUnique();
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.OrderDate);
+                entity.HasIndex(e => e.Status);
+                
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Orders)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                // TODO: PaymentMethod, ShippingMethod作成後に有効化
+                // entity.HasOne(e => e.PaymentMethod)
+                //     .WithMany()
+                //     .HasForeignKey(e => e.PaymentMethodId)
+                //     .OnDelete(DeleteBehavior.SetNull);
+                
+                // entity.HasOne(e => e.ShippingMethod)
+                //     .WithMany()
+                //     .HasForeignKey(e => e.ShippingMethodId)
+                //     .OnDelete(DeleteBehavior.SetNull);
                 
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // OrderHistory
+            modelBuilder.Entity<OrderHistory>(entity =>
+            {
+                entity.ToTable("order_histories");
+                entity.Property(e => e.OrderNumber).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.SubTotal).HasPrecision(10, 2);
+                entity.Property(e => e.DiscountAmount).HasPrecision(10, 2);
+                entity.Property(e => e.TaxAmount).HasPrecision(10, 2);
+                entity.Property(e => e.ShippingFee).HasPrecision(10, 2);
+                entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
+                entity.Property(e => e.CustomerNote).HasMaxLength(500);
+                entity.Property(e => e.AdminNote).HasMaxLength(500);
+                
+                entity.HasIndex(e => e.OriginalId);
+                entity.HasIndex(e => e.OperatedAt);
+                
+                entity.HasOne(e => e.OriginalOrder)
+                    .WithMany()
+                    .HasForeignKey(e => e.OriginalId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

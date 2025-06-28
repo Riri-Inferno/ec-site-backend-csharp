@@ -62,12 +62,12 @@ namespace EcSiteBackend.Domain.Entities
         public virtual ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
 
         /// <summary>
-        /// TODO:注文のコレクション
+        /// 注文のコレクション
         /// </summary>
-        // public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
         /// <summary>
-        /// TODO:カート（1対1）
+        /// カート（1対1）
         /// </summary>
         public virtual Cart? Cart { get; set; }
 

@@ -96,7 +96,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 注文明細のコレクション
         /// </summary>
-        // public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
         /// <summary>
         /// レビューのコレクション
