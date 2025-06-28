@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: supersecretpooppassword
       POSTGRES_DB: appdb
     ports:
-      - "9999:8888"
+      - "9999:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
