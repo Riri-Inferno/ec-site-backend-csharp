@@ -29,6 +29,9 @@ namespace EcSiteBackend.Infrastructure.DbContext
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderHistory> OrderHistories { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentHistory> PaymentHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -378,28 +381,27 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.CustomerNote).HasMaxLength(500);
                 entity.Property(e => e.AdminNote).HasMaxLength(500);
                 entity.Property(e => e.CouponCode).HasMaxLength(50);
-                
+
                 entity.HasIndex(e => e.OrderNumber).IsUnique();
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.OrderDate);
                 entity.HasIndex(e => e.Status);
-                
+
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.Orders)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
-                
-                // TODO: PaymentMethod, ShippingMethod作成後に有効化
-                // entity.HasOne(e => e.PaymentMethod)
-                //     .WithMany()
-                //     .HasForeignKey(e => e.PaymentMethodId)
-                //     .OnDelete(DeleteBehavior.SetNull);
-                
+
+                entity.HasOne(e => e.PaymentMethod)
+                    .WithMany()
+                    .HasForeignKey(e => e.PaymentMethodId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
                 // entity.HasOne(e => e.ShippingMethod)
                 //     .WithMany()
                 //     .HasForeignKey(e => e.ShippingMethodId)
                 //     .OnDelete(DeleteBehavior.SetNull);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -416,14 +418,82 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
                 entity.Property(e => e.CustomerNote).HasMaxLength(500);
                 entity.Property(e => e.AdminNote).HasMaxLength(500);
-                
+
                 entity.HasIndex(e => e.OriginalId);
                 entity.HasIndex(e => e.OperatedAt);
-                
+
                 entity.HasOne(e => e.OriginalOrder)
                     .WithMany()
                     .HasForeignKey(e => e.OriginalId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // PaymentMethod
+            modelBuilder.Entity<PaymentMethod>(entity =>
+            {
+                entity.ToTable("payment_methods");
+                entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Code).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.FeeAmount).HasPrecision(10, 2);
+                entity.Property(e => e.FeeRate).HasPrecision(5, 4);
+                entity.Property(e => e.MinimumAmount).HasPrecision(10, 2);
+                entity.Property(e => e.MaximumAmount).HasPrecision(10, 2);
+                entity.Property(e => e.IconUrl).HasMaxLength(500);
+                
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // Payment
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.ToTable("payments");
+                entity.Property(e => e.Amount).HasPrecision(10, 2);
+                entity.Property(e => e.RefundedAmount).HasPrecision(10, 2);
+                entity.Property(e => e.TransactionId).HasMaxLength(100);
+                entity.Property(e => e.ProviderName).HasMaxLength(50);
+                entity.Property(e => e.FailureReason).HasMaxLength(500);
+                entity.Property(e => e.RefundReason).HasMaxLength(500);
+                entity.Property(e => e.Note).HasMaxLength(500);
+                
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.TransactionId);
+                
+                entity.HasOne(e => e.Order)
+                    .WithOne(o => o.Payment)
+                    .HasForeignKey<Payment>(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasOne(e => e.PaymentMethod)
+                    .WithMany(pm => pm.Payments)
+                    .HasForeignKey(e => e.PaymentMethodId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // PaymentHistory
+            modelBuilder.Entity<PaymentHistory>(entity =>
+            {
+                entity.ToTable("payment_histories");
+                entity.Property(e => e.Amount).HasPrecision(10, 2);
+                entity.Property(e => e.RefundAmount).HasPrecision(10, 2);
+                entity.Property(e => e.TransactionId).HasMaxLength(100);
+                entity.Property(e => e.ErrorMessage).HasMaxLength(500);
+                
+                entity.HasIndex(e => e.PaymentId);
+                entity.HasIndex(e => e.OperatedAt);
+                
+                entity.HasOne(e => e.Payment)
+                    .WithMany(p => p.PaymentHistories)
+                    .HasForeignKey(e => e.PaymentId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

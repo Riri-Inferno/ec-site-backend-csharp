@@ -131,7 +131,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 支払い情報
         /// </summary>
-        // public virtual Payment? Payment { get; set; }
+        public virtual Payment? Payment { get; set; }
 
         /// <summary>
         /// 配送情報
@@ -141,7 +141,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 支払い方法
         /// </summary>
-        // public virtual PaymentMethod? PaymentMethod { get; set; }
+        public virtual PaymentMethod? PaymentMethod { get; set; }
 
         /// <summary>
         /// 配送方法
