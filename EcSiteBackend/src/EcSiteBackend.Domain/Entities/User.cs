@@ -84,7 +84,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// TODO:ユーザークーポンのコレクション
         /// </summary>
-        // public virtual ICollection<UserCoupon> UserCoupons { get; set; } = new List<UserCoupon>();
+        public virtual ICollection<UserCoupon> UserCoupons { get; set; } = new List<UserCoupon>();
 
         /// <summary>
         /// フルネームを取得

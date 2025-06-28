@@ -36,6 +36,10 @@ namespace EcSiteBackend.Infrastructure.DbContext
         public DbSet<Shipping> Shippings { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Favorite> Favorites { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<UserCoupon> UserCoupons { get; set; }
+        public DbSet<TaxRate> TaxRates { get; set; }
+        public DbSet<SystemSetting> SystemSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -510,10 +514,10 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.BaseFee).HasPrecision(10, 2);
                 entity.Property(e => e.FreeShippingMinAmount).HasPrecision(10, 2);
                 entity.Property(e => e.CarrierName).HasMaxLength(100);
-                
+
                 entity.HasIndex(e => e.Code).IsUnique();
                 entity.HasIndex(e => e.IsActive);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -526,21 +530,21 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.CarrierName).HasMaxLength(100);
                 entity.Property(e => e.ShippingFee).HasPrecision(10, 2);
                 entity.Property(e => e.Note).HasMaxLength(500);
-                
+
                 entity.HasIndex(e => e.OrderId).IsUnique();
                 entity.HasIndex(e => e.TrackingNumber);
                 entity.HasIndex(e => e.Status);
-                
+
                 entity.HasOne(e => e.Order)
                     .WithOne(o => o.Shipping)
                     .HasForeignKey<Shipping>(e => e.OrderId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 entity.HasOne(e => e.ShippingMethod)
                     .WithMany(sm => sm.Shippings)
                     .HasForeignKey(e => e.ShippingMethodId)
                     .OnDelete(DeleteBehavior.Restrict);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -552,26 +556,26 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.Title).HasMaxLength(200);
                 entity.Property(e => e.Comment).HasMaxLength(2000).IsRequired();
                 entity.Property(e => e.Rating).HasDefaultValue(1);
-                
+
                 entity.HasIndex(e => new { e.ProductId, e.UserId }).IsUnique();
                 entity.HasIndex(e => e.IsApproved);
                 entity.HasIndex(e => e.Rating);
-                
+
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.Reviews)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 entity.HasOne(e => e.Product)
                     .WithMany(p => p.Reviews)
                     .HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 entity.HasOne(e => e.Order)
                     .WithMany()
                     .HasForeignKey(e => e.OrderId)
                     .OnDelete(DeleteBehavior.SetNull);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -581,19 +585,104 @@ namespace EcSiteBackend.Infrastructure.DbContext
             {
                 entity.ToTable("favorites");
                 entity.Property(e => e.Note).HasMaxLength(500);
-                
+
                 entity.HasIndex(e => new { e.UserId, e.ProductId }).IsUnique();
                 entity.HasIndex(e => e.AddedAt);
-                
+
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.Favorites)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 entity.HasOne(e => e.Product)
                     .WithMany(p => p.Favorites)
                     .HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // Coupon
+            modelBuilder.Entity<Coupon>(entity =>
+            {
+                entity.ToTable("coupons");
+                entity.Property(e => e.Code).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.DiscountAmount).HasPrecision(10, 2);
+                entity.Property(e => e.DiscountRate).HasPrecision(5, 2);
+                entity.Property(e => e.MaxDiscountAmount).HasPrecision(10, 2);
+                entity.Property(e => e.MinimumPurchaseAmount).HasPrecision(10, 2);
+                
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.ValidFrom);
+                entity.HasIndex(e => e.ValidTo);
+                
+                entity.HasOne(e => e.TargetCategory)
+                    .WithMany()
+                    .HasForeignKey(e => e.TargetCategoryId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // UserCoupon
+            modelBuilder.Entity<UserCoupon>(entity =>
+            {
+                entity.ToTable("user_coupons");
+                
+                entity.HasIndex(e => new { e.UserId, e.CouponId });
+                entity.HasIndex(e => e.IsUsed);
+                
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.UserCoupons)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasOne(e => e.Coupon)
+                    .WithMany(c => c.UserCoupons)
+                    .HasForeignKey(e => e.CouponId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                entity.HasOne(e => e.UsedOrder)
+                    .WithMany()
+                    .HasForeignKey(e => e.UsedOrderId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // TaxRate
+            modelBuilder.Entity<TaxRate>(entity =>
+            {
+                entity.ToTable("tax_rates");
+                entity.Property(e => e.Name).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Rate).HasPrecision(5, 2);
+                entity.Property(e => e.Description).HasMaxLength(200);
+                
+                entity.HasIndex(e => e.TaxType);
+                entity.HasIndex(e => e.EffectiveFrom);
+                entity.HasIndex(e => e.IsDefault);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // SystemSetting
+            modelBuilder.Entity<SystemSetting>(entity =>
+            {
+                entity.ToTable("system_settings");
+                entity.Property(e => e.Key).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Value).HasMaxLength(1000).IsRequired();
+                entity.Property(e => e.Category).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.DataType).HasMaxLength(20).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(500);
+                
+                entity.HasIndex(e => e.Key).IsUnique();
+                entity.HasIndex(e => e.Category);
                 
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
