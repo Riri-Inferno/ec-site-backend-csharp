@@ -72,14 +72,14 @@ namespace EcSiteBackend.Domain.Entities
         public virtual Cart? Cart { get; set; }
 
         /// <summary>
-        /// TODO:レビューのコレクション
+        /// レビューのコレクション
         /// </summary>
-        // public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
         /// <summary>
-        /// TODO:お気に入りのコレクション
+        /// お気に入りのコレクション
         /// </summary>
-        // public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
 
         /// <summary>
         /// TODO:ユーザークーポンのコレクション

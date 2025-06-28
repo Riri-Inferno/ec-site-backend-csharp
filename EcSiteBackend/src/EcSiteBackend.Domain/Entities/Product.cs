@@ -101,12 +101,12 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// レビューのコレクション
         /// </summary>
-        // public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
         /// <summary>
         /// お気に入りのコレクション
         /// </summary>
-        // public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
 
         /// <summary>
         /// カート内商品のコレクション

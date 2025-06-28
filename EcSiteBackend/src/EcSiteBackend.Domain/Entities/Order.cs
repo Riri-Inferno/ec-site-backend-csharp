@@ -136,7 +136,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 配送情報
         /// </summary>
-        // public virtual Shipping? Shipping { get; set; }
+        public virtual Shipping? Shipping { get; set; }
 
         /// <summary>
         /// 支払い方法
@@ -146,6 +146,6 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 配送方法
         /// </summary>
-        // public virtual ShippingMethod? ShippingMethod { get; set; }
+        public virtual ShippingMethod? ShippingMethod { get; set; }
     }
 }
