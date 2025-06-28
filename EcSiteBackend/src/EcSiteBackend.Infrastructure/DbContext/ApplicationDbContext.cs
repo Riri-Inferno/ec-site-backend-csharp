@@ -14,6 +14,8 @@ namespace EcSiteBackend.Infrastructure.DbContext
         public DbSet<UserHistory> UserHistories { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<UserAddress> UserAddresses { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -81,6 +83,49 @@ namespace EcSiteBackend.Infrastructure.DbContext
                     .WithMany(r => r.UserRoles)
                     .HasForeignKey(e => e.RoleId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // UserAddress
+            modelBuilder.Entity<UserAddress>(entity =>
+            {
+                entity.ToTable("user_addresses");
+                entity.Property(e => e.AddressName).HasMaxLength(50);
+                entity.Property(e => e.RecipientName).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.PostalCode).HasMaxLength(7).IsRequired();
+                entity.Property(e => e.Prefecture).HasMaxLength(10).IsRequired();
+                entity.Property(e => e.City).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.AddressLine1).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.AddressLine2).HasMaxLength(100);
+                entity.Property(e => e.PhoneNumber).HasMaxLength(20).IsRequired();
+                
+                // UserとUserAddressのリレーション（1対多）
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.UserAddresses)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // PasswordResetToken
+            modelBuilder.Entity<PasswordResetToken>(entity =>
+            {
+                entity.ToTable("password_reset_tokens");
+                entity.Property(e => e.TokenHash).HasMaxLength(256).IsRequired();
+                entity.Property(e => e.RequestIpAddress).HasMaxLength(45);
+                entity.Property(e => e.UsedIpAddress).HasMaxLength(45);
+                entity.HasIndex(e => e.TokenHash);
+                entity.HasIndex(e => new { e.UserId, e.ExpiresAt });
+                
+                // UserとPasswordResetTokenのリレーション（1対多）
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.PasswordResetTokens)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
             });
         }
     }

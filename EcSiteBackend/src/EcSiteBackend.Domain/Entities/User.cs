@@ -52,9 +52,14 @@ namespace EcSiteBackend.Domain.Entities
         public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
         /// <summary>
-        /// TODO:ユーザー住所のコレクション
+        /// ユーザー住所のコレクション
         /// </summary>
-        // public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
+        public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
+
+        /// <summary>
+        /// パスワードリセットトークンのコレクション
+        /// </summary>
+        public virtual ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
 
         /// <summary>
         /// TODO:注文のコレクション
