@@ -3,6 +3,7 @@ using System;
 using EcSiteBackend.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcSiteBackend.Infrastructure.DbContext.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628162922_PaymentModels")]
+    partial class PaymentModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,164 +209,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Coupon", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<decimal?>("DiscountAmount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<decimal?>("DiscountRate")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("numeric(5,2)");
-
-                    b.Property<int>("DiscountType")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal?>("MaxDiscountAmount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<decimal?>("MinimumPurchaseAmount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<Guid?>("TargetCategoryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<int?>("UsageLimitPerUser")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("UsageLimitTotal")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UsedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ValidTo")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("TargetCategoryId");
-
-                    b.HasIndex("ValidFrom");
-
-                    b.HasIndex("ValidTo");
-
-                    b.ToTable("coupons", (string)null);
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Favorite", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("AddedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsNotificationEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AddedAt");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UserId", "ProductId")
-                        .IsUnique();
-
-                    b.ToTable("favorites", (string)null);
-                });
-
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Order", b =>
                 {
                     b.Property<Guid>("Id")
@@ -449,9 +294,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.Property<Guid?>("ShippingMethodId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ShippingMethodId1")
-                        .HasColumnType("uuid");
-
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -486,10 +328,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.HasIndex("PaymentMethodId");
 
                     b.HasIndex("PaymentMethodId1");
-
-                    b.HasIndex("ShippingMethodId");
-
-                    b.HasIndex("ShippingMethodId1");
 
                     b.HasIndex("Status");
 
@@ -1326,94 +1164,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.ToTable("product_images", (string)null);
                 });
 
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Review", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("HelpfulCount")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsVerifiedPurchase")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid?>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Rating")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsApproved");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("Rating");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("ProductId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("reviews", (string)null);
-                });
-
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1466,171 +1216,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                         .IsUnique();
 
                     b.ToTable("roles", (string)null);
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Shipping", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ActualDeliveryDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("ActualShipDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CarrierName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("EstimatedDeliveryDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("EstimatedShipDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("ShippingAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("ShippingFee")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<Guid>("ShippingMethodId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("TrackingNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique();
-
-                    b.HasIndex("ShippingMethodId");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("TrackingNumber");
-
-                    b.ToTable("shippings", (string)null);
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.ShippingMethod", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("BaseFee")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<string>("CarrierName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("EstimatedDays")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("FreeShippingMinAmount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsTrackable")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.ToTable("shipping_methods", (string)null);
                 });
 
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Stock", b =>
@@ -1762,153 +1347,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.HasIndex("StockId");
 
                     b.ToTable("stock_histories", (string)null);
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.SystemSetting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("DataType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsCacheable")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsEditable")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsEncrypted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Category");
-
-                    b.HasIndex("Key")
-                        .IsUnique();
-
-                    b.ToTable("system_settings", (string)null);
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.TaxRate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime>("EffectiveFrom")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("EffectiveTo")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<decimal>("Rate")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("numeric(5,2)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<int>("TaxType")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EffectiveFrom");
-
-                    b.HasIndex("IsDefault");
-
-                    b.HasIndex("TaxType");
-
-                    b.ToTable("tax_rates", (string)null);
                 });
 
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.User", b =>
@@ -2067,71 +1505,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.ToTable("user_addresses", (string)null);
                 });
 
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.UserCoupon", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("AcquiredAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CouponId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("boolean");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UsedOrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CouponId");
-
-                    b.HasIndex("IsUsed");
-
-                    b.HasIndex("UsedOrderId");
-
-                    b.HasIndex("UserId", "CouponId");
-
-                    b.ToTable("user_coupons", (string)null);
-                });
-
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.UserHistory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2264,35 +1637,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.Navigation("ParentCategory");
                 });
 
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Coupon", b =>
-                {
-                    b.HasOne("EcSiteBackend.Domain.Entities.Category", "TargetCategory")
-                        .WithMany()
-                        .HasForeignKey("TargetCategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("TargetCategory");
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Favorite", b =>
-                {
-                    b.HasOne("EcSiteBackend.Domain.Entities.Product", "Product")
-                        .WithMany("Favorites")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EcSiteBackend.Domain.Entities.User", "User")
-                        .WithMany("Favorites")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Order", b =>
                 {
                     b.HasOne("EcSiteBackend.Domain.Entities.PaymentMethod", "PaymentMethod")
@@ -2304,15 +1648,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                         .WithMany("Orders")
                         .HasForeignKey("PaymentMethodId1");
 
-                    b.HasOne("EcSiteBackend.Domain.Entities.ShippingMethod", "ShippingMethod")
-                        .WithMany()
-                        .HasForeignKey("ShippingMethodId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("EcSiteBackend.Domain.Entities.ShippingMethod", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("ShippingMethodId1");
-
                     b.HasOne("EcSiteBackend.Domain.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
@@ -2320,8 +1655,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                         .IsRequired();
 
                     b.Navigation("PaymentMethod");
-
-                    b.Navigation("ShippingMethod");
 
                     b.Navigation("User");
                 });
@@ -2449,51 +1782,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Review", b =>
-                {
-                    b.HasOne("EcSiteBackend.Domain.Entities.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("EcSiteBackend.Domain.Entities.Product", "Product")
-                        .WithMany("Reviews")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EcSiteBackend.Domain.Entities.User", "User")
-                        .WithMany("Reviews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Shipping", b =>
-                {
-                    b.HasOne("EcSiteBackend.Domain.Entities.Order", "Order")
-                        .WithOne("Shipping")
-                        .HasForeignKey("EcSiteBackend.Domain.Entities.Shipping", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EcSiteBackend.Domain.Entities.ShippingMethod", "ShippingMethod")
-                        .WithMany("Shippings")
-                        .HasForeignKey("ShippingMethodId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("ShippingMethod");
-                });
-
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Stock", b =>
                 {
                     b.HasOne("EcSiteBackend.Domain.Entities.Product", "Product")
@@ -2530,32 +1818,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.UserCoupon", b =>
-                {
-                    b.HasOne("EcSiteBackend.Domain.Entities.Coupon", "Coupon")
-                        .WithMany("UserCoupons")
-                        .HasForeignKey("CouponId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EcSiteBackend.Domain.Entities.Order", "UsedOrder")
-                        .WithMany()
-                        .HasForeignKey("UsedOrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("EcSiteBackend.Domain.Entities.User", "User")
-                        .WithMany("UserCoupons")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Coupon");
-
-                    b.Navigation("UsedOrder");
 
                     b.Navigation("User");
                 });
@@ -2602,11 +1864,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.Navigation("ProductCategories");
                 });
 
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.Coupon", b =>
-                {
-                    b.Navigation("UserCoupons");
-                });
-
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
@@ -2614,8 +1871,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                     b.Navigation("OrderStatusHistories");
 
                     b.Navigation("Payment");
-
-                    b.Navigation("Shipping");
                 });
 
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Payment", b =>
@@ -2634,15 +1889,11 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                 {
                     b.Navigation("CartItems");
 
-                    b.Navigation("Favorites");
-
                     b.Navigation("OrderItems");
 
                     b.Navigation("ProductCategories");
 
                     b.Navigation("ProductImages");
-
-                    b.Navigation("Reviews");
 
                     b.Navigation("Stock");
                 });
@@ -2650,13 +1901,6 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("EcSiteBackend.Domain.Entities.ShippingMethod", b =>
-                {
-                    b.Navigation("Orders");
-
-                    b.Navigation("Shippings");
                 });
 
             modelBuilder.Entity("EcSiteBackend.Domain.Entities.Stock", b =>
@@ -2668,17 +1912,11 @@ namespace EcSiteBackend.Infrastructure.DbContext.Migrations
                 {
                     b.Navigation("Cart");
 
-                    b.Navigation("Favorites");
-
                     b.Navigation("Orders");
 
                     b.Navigation("PasswordResetTokens");
 
-                    b.Navigation("Reviews");
-
                     b.Navigation("UserAddresses");
-
-                    b.Navigation("UserCoupons");
 
                     b.Navigation("UserRoles");
                 });

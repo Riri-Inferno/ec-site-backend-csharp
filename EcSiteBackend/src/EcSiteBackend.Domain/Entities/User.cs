@@ -47,39 +47,44 @@ namespace EcSiteBackend.Domain.Entities
 
         // Navigation Properties
         /// <summary>
-        /// TODO:ユーザーロールのコレクション
+        /// ユーザーロールのコレクション
         /// </summary>
-        // public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
         /// <summary>
-        /// TODO:ユーザー住所のコレクション
+        /// ユーザー住所のコレクション
         /// </summary>
-        // public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
+        public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
 
         /// <summary>
-        /// TODO:注文のコレクション
+        /// パスワードリセットトークンのコレクション
         /// </summary>
-        // public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        public virtual ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
 
         /// <summary>
-        /// TODO:カート（1対1）
+        /// 注文のコレクション
         /// </summary>
-        // public virtual Cart? Cart { get; set; }
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
         /// <summary>
-        /// TODO:レビューのコレクション
+        /// カート（1対1）
         /// </summary>
-        // public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual Cart? Cart { get; set; }
 
         /// <summary>
-        /// TODO:お気に入りのコレクション
+        /// レビューのコレクション
         /// </summary>
-        // public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+        /// <summary>
+        /// お気に入りのコレクション
+        /// </summary>
+        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
 
         /// <summary>
         /// TODO:ユーザークーポンのコレクション
         /// </summary>
-        // public virtual ICollection<UserCoupon> UserCoupons { get; set; } = new List<UserCoupon>();
+        public virtual ICollection<UserCoupon> UserCoupons { get; set; } = new List<UserCoupon>();
 
         /// <summary>
         /// フルネームを取得
