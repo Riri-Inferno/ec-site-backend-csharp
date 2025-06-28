@@ -256,20 +256,22 @@ namespace EcSiteBackend.Infrastructure.DbContext
             {
                 entity.ToTable("stock_histories");
                 entity.Property(e => e.Note).HasMaxLength(500);
-                
+
                 entity.HasIndex(e => e.StockId);
                 entity.HasIndex(e => e.OperatedAt);
                 entity.HasIndex(e => e.MovementType);
-                
+
                 entity.HasOne(e => e.Stock)
                     .WithMany(s => s.StockHistories)
                     .HasForeignKey(e => e.StockId)
                     .OnDelete(DeleteBehavior.Cascade);
                     
-                entity.HasOne(e => e.RelatedOrder)
-                    .WithMany()
-                    .HasForeignKey(e => e.RelatedOrderId)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    
+                // TODO:未作成
+                // entity.HasOne(e => e.RelatedOrder)
+                //     .WithMany()
+                //     .HasForeignKey(e => e.RelatedOrderId)
+                //     .OnDelete(DeleteBehavior.SetNull);
             });
 
         }
