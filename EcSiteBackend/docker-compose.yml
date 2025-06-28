@@ -1,4 +1,4 @@
-version:
+version: ""
 
 services:
   db:
@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: supersecretpooppassword
       POSTGRES_DB: appdb
     ports:
-      - "5432:5432"
+      - "9999:8888"
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
