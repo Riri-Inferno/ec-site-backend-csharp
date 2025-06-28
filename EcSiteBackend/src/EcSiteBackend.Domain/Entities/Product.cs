@@ -111,6 +111,6 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// カート内商品のコレクション
         /// </summary>
-        // public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
     }
 }

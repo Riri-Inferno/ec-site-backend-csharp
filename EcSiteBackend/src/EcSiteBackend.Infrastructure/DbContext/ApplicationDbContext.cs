@@ -23,6 +23,8 @@ namespace EcSiteBackend.Infrastructure.DbContext
         public DbSet<ProductHistory> ProductHistories { get; set; }
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<StockHistory> StockHistories { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -144,13 +146,13 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.Slug).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.ImageUrl).HasMaxLength(500);
                 entity.HasIndex(e => e.Slug).IsUnique();
-                
+
                 // 自己参照のリレーション
                 entity.HasOne(e => e.ParentCategory)
                     .WithMany(e => e.ChildCategories)
                     .HasForeignKey(e => e.ParentCategoryId)
                     .OnDelete(DeleteBehavior.Restrict);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -160,13 +162,13 @@ namespace EcSiteBackend.Infrastructure.DbContext
             {
                 entity.ToTable("product_categories");
                 entity.HasKey(e => new { e.ProductId, e.CategoryId });
-                
+
                 // ProductとProductCategoryのリレーション（1対多）
                 entity.HasOne(e => e.Product)
                     .WithMany(p => p.ProductCategories)
                     .HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 // CategoryとProductCategoryのリレーション（1対多）
                 entity.HasOne(e => e.Category)
                     .WithMany(c => c.ProductCategories)
@@ -182,13 +184,13 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.ThumbnailUrl).HasMaxLength(500);
                 entity.Property(e => e.Title).HasMaxLength(200);
                 entity.Property(e => e.AltText).HasMaxLength(200);
-                
+
                 // ProductとProductImageのリレーション（1対多）
                 entity.HasOne(e => e.Product)
                     .WithMany(p => p.ProductImages)
                     .HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -206,12 +208,12 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.MetaTitle).HasMaxLength(100);
                 entity.Property(e => e.MetaDescription).HasMaxLength(200);
                 entity.Property(e => e.Slug).HasMaxLength(200).IsRequired();
-                
+
                 entity.HasIndex(e => e.Sku).IsUnique();
                 entity.HasIndex(e => e.Slug).IsUnique();
                 entity.HasIndex(e => e.Status);
                 entity.HasIndex(e => e.IsPublished);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -226,10 +228,10 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.Price).HasPrecision(10, 2);
                 entity.Property(e => e.CostPrice).HasPrecision(10, 2);
                 entity.Property(e => e.ListPrice).HasPrecision(10, 2);
-                
+
                 entity.HasIndex(e => e.OriginalId);
                 entity.HasIndex(e => e.OperatedAt);
-                
+
                 entity.HasOne(e => e.OriginalProduct)
                     .WithMany()
                     .HasForeignKey(e => e.OriginalId)
@@ -241,12 +243,12 @@ namespace EcSiteBackend.Infrastructure.DbContext
             {
                 entity.ToTable("stocks");
                 entity.HasIndex(e => e.ProductId).IsUnique();
-                
+
                 entity.HasOne(e => e.Product)
                     .WithOne(p => p.Stock)
                     .HasForeignKey<Stock>(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -265,8 +267,8 @@ namespace EcSiteBackend.Infrastructure.DbContext
                     .WithMany(s => s.StockHistories)
                     .HasForeignKey(e => e.StockId)
                     .OnDelete(DeleteBehavior.Cascade);
-                    
-                    
+
+
                 // TODO:未作成
                 // entity.HasOne(e => e.RelatedOrder)
                 //     .WithMany()
@@ -274,6 +276,50 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 //     .OnDelete(DeleteBehavior.SetNull);
             });
 
+            // Cart
+            modelBuilder.Entity<Cart>(entity =>
+            {
+                entity.ToTable("carts");
+                entity.Property(e => e.SessionId).HasMaxLength(100);
+                
+                // UserとCartの1対1リレーション
+                entity.HasOne(e => e.User)
+                    .WithOne(u => u.Cart)
+                    .HasForeignKey<Cart>(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasIndex(e => e.UserId).IsUnique();
+                entity.HasIndex(e => e.SessionId);
+                entity.HasIndex(e => e.LastActivityAt);
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // CartItem
+            modelBuilder.Entity<CartItem>(entity =>
+            {
+                entity.ToTable("cart_items");
+                entity.Property(e => e.PriceAtAdded).HasPrecision(10, 2);
+                
+                // CartとCartItemのリレーション（1対多）
+                entity.HasOne(e => e.Cart)
+                    .WithMany(c => c.CartItems)
+                    .HasForeignKey(e => e.CartId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // ProductとCartItemのリレーション（1対多）
+                entity.HasOne(e => e.Product)
+                    .WithMany(p => p.CartItems)
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                // 同じ商品を重複して追加できないようにする
+                entity.HasIndex(e => new { e.CartId, e.ProductId }).IsUnique();
+                
+                // 論理削除のグローバルフィルタ
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
         }
     }
 }

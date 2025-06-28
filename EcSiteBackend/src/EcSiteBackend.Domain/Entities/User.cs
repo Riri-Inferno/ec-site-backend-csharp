@@ -69,7 +69,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// TODO:カート（1対1）
         /// </summary>
-        // public virtual Cart? Cart { get; set; }
+        public virtual Cart? Cart { get; set; }
 
         /// <summary>
         /// TODO:レビューのコレクション
