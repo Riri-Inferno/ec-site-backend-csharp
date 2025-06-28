@@ -1,3 +1,5 @@
+using EcSiteBackend.Domain.Enums;
+
 namespace EcSiteBackend.Domain.Entities
 {
     /// <summary>

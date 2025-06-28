@@ -1,3 +1,5 @@
+using EcSiteBackend.Domain.Enums;
+
 namespace EcSiteBackend.Domain.Entities
 {
     /// <summary>
@@ -94,21 +96,21 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 注文明細のコレクション
         /// </summary>
-        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        // public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
         /// <summary>
         /// レビューのコレクション
         /// </summary>
-        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        // public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
         /// <summary>
         /// お気に入りのコレクション
         /// </summary>
-        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+        // public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
 
         /// <summary>
         /// カート内商品のコレクション
         /// </summary>
-        public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+        // public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
     }
 }
