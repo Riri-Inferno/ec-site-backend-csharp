@@ -7,6 +7,8 @@ using EcSiteBackend.Infrastructure.Services;
 using EcSiteBackend.Application.Common.Mappings;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Queries;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations;
+using EcSiteBackend.Application.UseCases.Interfaces;
+using EcSiteBackend.Application.UseCases.Interactors;
 using HotChocolate.Data;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
@@ -37,17 +39,20 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
 
-            // 4. AutoMapper
+            // 4. UseCases
+            services.AddScoped<ICreateUserUseCase, CreateUserInteractor>();
+
+            // 5. AutoMapper
             services.AddAutoMapper(typeof(UserMappingProfile));
 
-            // 5. MediatR（TODO）
+            // 6. MediatR（TODO）
             // services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
             //     typeof(CreateUserCommand).Assembly));
 
-            // 6. FluentValidation（TODO）
+            // 7. FluentValidation（TODO）
             // services.AddValidatorsFromAssembly(typeof(CreateUserCommand).Assembly);
 
-            // 7. GraphQL
+            // 8. GraphQL
             services
                 .AddGraphQLServer()
                 .AddQueryType(d => d.Name("Query"))
@@ -56,7 +61,9 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 .AddType<UserMutations>()
                 .AddProjections()
                 .AddFiltering()
-                .AddSorting();
+                .AddSorting()
+                .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true); // エラー詳細を表示
+
         }
 
         // 仮置き
