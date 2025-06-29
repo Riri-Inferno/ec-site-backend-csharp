@@ -10,6 +10,7 @@ using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Application.UseCases.Interactors;
 using HotChocolate.Data;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 {
@@ -61,6 +62,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 .AddType<UserMutations>()
                 .AddProjections()
                 .AddFiltering()
+                .AddErrorFilter<ErrorFilter>()
                 .AddSorting()
                 .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true); // エラー詳細を表示
 
