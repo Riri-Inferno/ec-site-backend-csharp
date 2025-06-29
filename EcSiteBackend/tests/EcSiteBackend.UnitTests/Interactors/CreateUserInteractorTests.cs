@@ -5,6 +5,7 @@ using AutoMapper;
 using Moq;
 using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Domain.Entities;
+using EcSiteBackend.Application.DTOs;
 
 namespace EcSiteBackend.Interactors.UnitTests
 {
@@ -47,6 +48,22 @@ namespace EcSiteBackend.Interactors.UnitTests
                 LastName = "太郎",
                 PhoneNumber = "090-9999-9999"
             };
+
+            _userRepositoryMock.Setup(repo => repo.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _userRepositoryMock.Setup(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(1);
+
+            _mapperMock.Setup(mapper => mapper.Map<UserDto>(It.IsAny<User>()))
+                .Returns(new UserDto
+                {
+                    Email = input.Email,
+                    FirstName = input.FirstName,
+                    LastName = input.LastName,
+                    PhoneNumber = input.PhoneNumber
+                });
+            
 
             // Act
             var result = await _interactor.ExecuteAsync(input);
