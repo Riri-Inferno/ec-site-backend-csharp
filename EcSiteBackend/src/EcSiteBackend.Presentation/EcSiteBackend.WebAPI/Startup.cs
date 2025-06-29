@@ -5,6 +5,9 @@ using EcSiteBackend.Infrastructure.DbContext;
 using EcSiteBackend.Infrastructure.Persistence.Repositories;
 using EcSiteBackend.Infrastructure.Services;
 using EcSiteBackend.Application.Common.Mappings;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Queries;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations;
+using HotChocolate.Data;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 {
@@ -47,8 +50,13 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             // 7. GraphQL
             services
                 .AddGraphQLServer()
-                .AddQueryType<Query>();
-            // .AddMutationType<TODO>() // 後で作成
+                .AddQueryType(d => d.Name("Query"))
+                .AddType<UserQueries>()
+                .AddMutationType(d => d.Name("Mutation"))
+                .AddType<UserMutations>()
+                .AddProjections()
+                .AddFiltering()
+                .AddSorting();
         }
 
         // 仮置き
