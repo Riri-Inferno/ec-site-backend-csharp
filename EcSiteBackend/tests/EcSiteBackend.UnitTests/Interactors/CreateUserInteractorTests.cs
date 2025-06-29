@@ -78,5 +78,49 @@ namespace EcSiteBackend.Interactors.UnitTests
             _userRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
             _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
+
+        [Theory(DisplayName = "異常系：バリデーション例外が発生する")]
+        [InlineData("", "password123", "名", "姓", "090-9999-9999", "メールアドレスは必須です。")]
+        [InlineData("test.user@gmail.com", "", "名", "姓", "090-9999-9999", "パスワードは必須です。")]
+        [InlineData("test.user@gmail.com", "short", "名", "姓", "090-9999-9999", "パスワードは8文字以上である必要があります。")]
+        [InlineData("test.user@gmail.com", "password123", "", "姓", "090-9999-9999", "名は必須です。")]
+        [InlineData("test.user@gmail.com", "password123", "名", "", "090-9999-9999", "姓は必須です。")]
+        public async Task ExecuteAsync_InvalidInput_ThrowsArgumentException(string email, string password, string firstName, string lastName, string phoneNumber, string expectedMessage)
+        {
+            // Arrange
+            var input = new CreateUserInput
+            {
+                Email = email,
+                Password = password,
+                FirstName = firstName,
+                LastName = lastName,
+                PhoneNumber = phoneNumber
+            };
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _interactor.ExecuteAsync(input));
+            Assert.Equal(expectedMessage, ex.Message);
+        }
+
+        [Fact(DisplayName = "異常系：メールアドレス重複で例外が発生する")]
+        public async Task ExecuteAsync_DuplicateEmail_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var input = new CreateUserInput
+            {
+                Email = "duplicate.user@gmail.com",
+                Password = "password123",
+                FirstName = "名",
+                LastName = "姓",
+                PhoneNumber = "090-9999-9999"
+            };
+
+            _userRepositoryMock.Setup(repo => repo.GetByEmailAsync(input.Email, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new User { Email = input.Email });
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _interactor.ExecuteAsync(input));
+            Assert.Equal("このメールアドレスは既に使用されています。", ex.Message);
+        }
     }
 }
