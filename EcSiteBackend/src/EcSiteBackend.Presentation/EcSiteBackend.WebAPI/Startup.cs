@@ -4,6 +4,7 @@ using EcSiteBackend.Application.Common.Interfaces.Repositories;
 using EcSiteBackend.Infrastructure.DbContext;
 using EcSiteBackend.Infrastructure.Persistence.Repositories;
 using EcSiteBackend.Infrastructure.Services;
+using EcSiteBackend.Application.Common.Mappings;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 {
@@ -31,10 +32,10 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 
             // 3. Services
             services.AddScoped<ITransactionService, TransactionService>();
-            // services.AddScoped<IPasswordHasher, PasswordHasher>(); // 後で作成
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
 
-            // 4. AutoMapper（TODO）
-            // services.AddAutoMapper(typeof(MappingProfile));
+            // 4. AutoMapper
+            services.AddAutoMapper(typeof(UserMappingProfile));
 
             // 5. MediatR（TODO）
             // services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(

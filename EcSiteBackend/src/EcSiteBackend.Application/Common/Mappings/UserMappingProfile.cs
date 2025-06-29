@@ -7,9 +7,9 @@ namespace EcSiteBackend.Application.Common.Mappings
     /// <summary>
     /// ユーザーオブジェクトのマッピング設定
     /// </summary>
-    public class MappingProfile : Profile
+    public class UserMappingProfile : Profile
     {
-        public MappingProfile()
+        public UserMappingProfile()
         {
             // User → UserDto
             CreateMap<User, UserDto>()
