@@ -7,25 +7,24 @@ using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
 {
     /// <summary>
-    /// ユーザー関連のMutation
+    /// ユーザーに関するGraphQL Mutation定義クラス
     /// </summary>
     [ExtendObjectType("Mutation")]
     public class UserMutations
     {
         /// <summary>
-        /// ユーザーを作成する
+        /// ユーザー登録（サインアップ）を実行するMutation
         /// </summary>
-        /// <param name="input">ユーザー作成入力</param>
-        /// <param name="createUserUseCase">ユーザー作成ユースケース</param>
+        /// <param name="input">サインアップ入力情報</param>
+        /// <param name="signUpUseCase">サインアップユースケースサービス</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
-        /// <returns>作成されたユーザー</returns>
-        public async Task<UserDto> CreateUser(
-            CreateUserInputType input,
-            [Service] ICreateUserUseCase createUserUseCase,
+        /// <returns>作成されたユーザー情報</returns>
+        public async Task<SignUpOutput> SignUp(
+            SignUpInputType input,
+            [Service] ISignUpUseCase signUpUseCase,
             CancellationToken cancellationToken)
         {
-            // GraphQL入力型をアプリケーション層の入力型に変換
-            var useCaseInput = new CreateUserInput
+            var useCaseInput = new SignUpInput
             {
                 Email = input.Email,
                 Password = input.Password,
@@ -34,8 +33,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
                 PhoneNumber = input.PhoneNumber
             };
 
-            // ユースケースを実行
-            return await createUserUseCase.ExecuteAsync(useCaseInput, cancellationToken);
+            return await signUpUseCase.ExecuteAsync(useCaseInput, cancellationToken);
         }
     }
 }
