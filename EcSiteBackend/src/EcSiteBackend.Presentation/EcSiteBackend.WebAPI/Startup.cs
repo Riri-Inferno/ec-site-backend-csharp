@@ -9,8 +9,11 @@ using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Queries;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Application.UseCases.Interactors;
-using HotChocolate.Data;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters;
+using EcSiteBackend.Application.Common.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 {
@@ -28,6 +31,28 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             // secrets.jsonから接続文字列を取得
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
 
+            // JWT設定を読み込み
+            var jwtSettings = new JwtSettings();
+            _configuration.GetSection("JwtSettings").Bind(jwtSettings);
+            services.Configure<JwtSettings>(_configuration.GetSection("JwtSettings"));
+
+            // JWT認証の設定
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwtSettings.Secret))
+                    };
+                });
+
             // 1. DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString));
@@ -39,9 +64,10 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             // 3. Services
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IJwtService, JwtService>();
 
             // 4. UseCases
-            services.AddScoped<ICreateUserUseCase, CreateUserInteractor>();
+            services.AddScoped<ISignUpUseCase, SignUpInteractor>();
 
             // 5. AutoMapper
             services.AddAutoMapper(typeof(UserMappingProfile));
@@ -64,14 +90,9 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 .AddFiltering()
                 .AddErrorFilter<ErrorFilter>()
                 .AddSorting()
+                .AddAuthorization()
                 .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true); // エラー詳細を表示
 
-        }
-
-        // 仮置き
-        public class Query
-        {
-            public string Hello() => "Hello, GraphQL!";
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -82,6 +103,10 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             }
 
             app.UseRouting();
+
+            // 認証ミドルウェア
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
