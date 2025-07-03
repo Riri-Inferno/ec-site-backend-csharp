@@ -19,9 +19,11 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Build
+        working-directory: EcSiteBackend
         run: |
           dotnet restore
           dotnet build --configuration Release
 
       - name: Run Tests
+        working-directory: EcSiteBackend
         run: dotnet test --no-build --configuration Release --verbosity normal
