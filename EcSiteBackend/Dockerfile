@@ -8,6 +8,8 @@ COPY src/EcSiteBackend.Domain/*.csproj ./src/EcSiteBackend.Domain/
 COPY src/EcSiteBackend.Application/*.csproj ./src/EcSiteBackend.Application/
 COPY src/EcSiteBackend.Infrastructure/*.csproj ./src/EcSiteBackend.Infrastructure/
 COPY src/EcSiteBackend.Presentation/EcSiteBackend.WebAPI/*.csproj ./src/EcSiteBackend.Presentation/EcSiteBackend.WebAPI/
+COPY tests/EcSiteBackend.UnitTests/*.csproj ./tests/EcSiteBackend.UnitTests/
+COPY tests/EcSiteBackend.IntegrationTests/*.csproj ./tests/EcSiteBackend.IntegrationTests/
 
 # Restore dependencies
 RUN dotnet restore
