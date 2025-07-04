@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy solution and project files
-COPY *.sln .
+COPY EcSiteBackend.sln .
 COPY src/EcSiteBackend.Domain/*.csproj ./src/EcSiteBackend.Domain/
 COPY src/EcSiteBackend.Application/*.csproj ./src/EcSiteBackend.Application/
 COPY src/EcSiteBackend.Infrastructure/*.csproj ./src/EcSiteBackend.Infrastructure/
@@ -14,7 +14,7 @@ COPY tests/EcSiteBackend.IntegrationTests/*.csproj ./tests/EcSiteBackend.Integra
 # Restore dependencies
 RUN dotnet restore
 
-# Copy everything else
+# Copy everything else from the solution root
 COPY . .
 
 # Build the application
