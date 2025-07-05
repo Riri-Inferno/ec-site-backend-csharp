@@ -33,8 +33,8 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 
             // JWT設定を読み込み
             var jwtSettings = new JwtSettings();
-            _configuration.GetSection("Jwt").Bind(jwtSettings);
-            services.Configure<JwtSettings>(_configuration.GetSection("Jwt"));
+            _configuration.GetSection("JwtSettings").Bind(jwtSettings);
+            services.Configure<JwtSettings>(_configuration.GetSection("JwtSettings"));
 
             // JWT認証の設定
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
