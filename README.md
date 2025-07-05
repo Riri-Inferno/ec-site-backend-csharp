@@ -16,95 +16,113 @@
 - **言語**: C#
 - **フレームワーク**: ASP.NET Core
 - **API**: GraphQL（Hot Chocolate ライブラリ）
-- **データベース**: SQL Server または PostgreSQL
+- **データベース**: PostgreSQL
 - **ORM**: Entity Framework Core
 - **認証**: JWT（JSON Web Token）
+- **コンテナ**: Docker
 
 ## 必要条件
 
-- **.NET 6 SDK** 以上
-- **SQL Server** または **PostgreSQL** のいずれか
-- （オプション）**Docker**（コンテナ化された環境で実行する場合）
+- **.NET 8 SDK** 以上
+- **Docker** および **Docker Compose**
+- **PostgreSQL**
+
+> **⚠️ 重要な注意事項**:
+>
+> - Linux または macOS を使用している場合は、**Snap 版の Docker をインストールしないでください**。権限エラーが発生する可能性があります。
+> - 通常版の Docker を公式サイトからインストールしてください。
 
 ## 環境構築手順
 
-### リポジトリのクローン
+### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/あなたのユーザー名/リポジトリ名.git
-cd リポジトリ名
+git clone https://github.com/Riri-Inferno/ec-site-backend-csharp.git
+cd ec-site-backend-csharp
 ```
 
-### パッケージの復元
+### 2. 必要なファイルの準備
+
+#### `.env` ファイルの作成
+
+プロジェクトルートに `.env` ファイルを作成し、以下の内容を記述してください：
+
+```env
+# JWT シークレットキー（64文字以上の安全な文字列を設定）
+JWT_SECRET="your-jwt-secret-key-here"
+
+# PostgreSQL データベースのパスワード
+POSTGRES_PASSWORD="your-database-password"
+```
+
+#### `secrets.json` ファイルの作成
+
+開発環境用の設定ファイルを作成します：
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=9999;Username=postgres;Password=your-database-password;Database=appdb"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "JwtSettings": {
+    "Secret": "your-jwt-secret-key-here",
+    "Issuer": "EcSiteBackend",
+    "Audience": "EcSiteBackendClient",
+    "ExpirationInMinutes": 60
+  },
+  "AllowedHosts": "*"
+}
+```
+
+### 3. Docker 環境の起動（開発時はこちらを推奨、マイグレは別途行ってください）
+
+```bash
+cd EcSiteBackend
+docker compose up -d
+```
+
+### 4. パッケージの復元
 
 ```bash
 dotnet restore
 ```
 
-### アプリケーション設定
-
-`appsettings.json` ファイルをコピーして新しく `appsettings.Development.json` を作成し、データベース接続文字列などの開発環境用設定を追加します。
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=データベース名;User Id=ユーザー名;Password=パスワード;"
-  },
-  "JwtSettings": {
-    "Secret": "あなたのJWTシークレットキー",
-    "Issuer": "あなたのIssuer",
-    "Audience": "あなたのAudience",
-    "ExpiresInMinutes": 60
-  }
-}
-```
-
-### データベースのマイグレーションと更新
+### 5. データベースのマイグレーション
 
 ```bash
-dotnet ef database update
+cd ~/ec-site-backend-csharp/EcSiteBackend/src/EcSiteBackend.Infrastructure
+dotnet ef database update --project ../EcSiteBackend.Infrastructure --startup-project ../EcSiteBackend.Presentation/EcSiteBackend.WebAPI
 ```
 
-### アプリケーションの起動
+### 6. アプリケーションの起動
 
 ```bash
+cd ~/ec-site-backend-csharp/EcSiteBackend/src/EcSiteBackend.Presentation/EcSiteBackend.WebAPI
 dotnet run
 ```
 
-アプリケーションはデフォルトで `https://localhost:5004` または `http://localhost:5000` で実行されます。
+アプリケーションはデフォルトで `http://localhost:5000` で実行されます。
 
 ## GraphQL の使用方法
 
 ### GraphQL エンドポイント
 
-- **エンドポイント URL**: `https://localhost:5001/graphql`
+- **エンドポイント URL**: `http://localhost:5000/graphql`
 
-### GraphQL プレイグラウンドのアクセス
+### GraphQL Playground のアクセス
 
-ブラウザでエンドポイントにアクセスすると、GraphQL Playground（または Hot Chocolate 使用時は Banana Cake Pop）が表示され、クエリの実行やスキーマの確認が可能です。
+ブラウザでエンドポイントにアクセスすると、Banana Cake Pop（Hot Chocolate の GraphQL IDE）が表示され、クエリの実行やスキーマの確認が可能です。
 
 ### サンプルクエリ
 
 ```graphql
-# ユーザー一覧を取得
-query {
-  users {
-    id
-    name
-    email
-  }
-}
-
-# ユーザーを追加
-mutation {
-  addUser(
-    input: { name: "太郎", email: "taro@example.com", password: "password123" }
-  ) {
-    id
-    name
-    email
-  }
-}
+/* 準備中 */
 ```
 
 ## 認証
@@ -112,40 +130,49 @@ mutation {
 クライアントは認証が必要なクエリやミューテーションを実行する際、リクエストヘッダーに JWT を含める必要があります。
 
 - **ヘッダー例**:
-
   ```
-  Authorization: Bearer あなたのJWTトークン
+  Authorization: Bearer your-jwt-token-here
   ```
 
 ## テストの実行
 
-単体テストを実行するには、以下のコマンドを使用します。
+単体テストを実行するには、テストプロジェクトをビルドして IDE の GUI で実行するか、以下のコマンドを使用します：
 
 ```bash
 dotnet test
 ```
 
-## デプロイ方法
+## ディレクトリ構成
 
-### リリースビルドの作成
+本プロジェクトはクリーンアーキテクチャの原則に従って構成されています：
 
-```bash
-dotnet publish -c Release
+```
+EcSiteBackend/
+├── src/
+│   ├── EcSiteBackend.Domain/           # ビジネスエンティティとルール
+│   │   ├── Entities/                   # User, Product, Order等
+│   │   ├── Enums/                      # ビジネス列挙型
+│   │   └── Constants/                  # ドメイン定数
+│   │
+│   ├── EcSiteBackend.Application/      # ビジネスロジック
+│   │   ├── UseCases/                   # ユースケース実装
+│   │   ├── DTOs/                       # データ転送オブジェクト
+│   │   └── Common/                     # 共通インターフェース
+│   │
+│   ├── EcSiteBackend.Infrastructure/   # 外部システム連携
+│   │   ├── DbContext/                  # EF Core コンテキスト
+│   │   ├── Persistence/                # リポジトリ実装
+│   │   └── Services/                   # 外部サービス実装
+│   │
+│   └── EcSiteBackend.Presentation/     # プレゼンテーション層
+│       └── EcSiteBackend.WebAPI/       # Web API プロジェクト
+│           ├── GraphQL/                # GraphQL定義
+│           └── Program.cs              # エントリーポイント
+│
+└── tests/                              # テストプロジェクト
 ```
 
-### Docker を使用したデプロイ（いつか）
-
-1. **Docker イメージのビルド**
-
-   ```bash
-   docker build -t あなたのイメージ名 .
-   ```
-
-2. **コンテナの実行**
-
-   ```bash
-   docker run -d -p 80:80 あなたのイメージ名
-   ```
+詳細は `docs/architecture.md` を参照してください。
 
 ## 開発に関する情報
 
@@ -155,13 +182,20 @@ dotnet publish -c Release
 - **Entity Framework Core**: データベース接続と ORM
 - **System.IdentityModel.Tokens.Jwt**: JWT の生成と検証
 
-### ディレクトリ構成
+## トラブルシューティング
 
-- `/Entities`: データベースエンティティ
-- `/Repositories`: データ操作のためのリポジトリクラス
-- `/GraphQL`: GraphQL スキーマ、クエリ、ミューテーション
-- `/Services`: ビジネスロジックの実装
-- `/Configurations`: アプリケーション設定
+### Docker 関連のエラー
+
+主にリナックス向け
+
+- **Permission denied エラー**: Snap 版 Docker を使用している場合は、アンインストールして通常版をインストールしてください
+- **docker-compose コマンドが見つからない**: 最新の Docker では `docker compose`（ハイフンなし）を使用してください
+
+### データベース接続エラー
+
+- PostgreSQL コンテナが起動していることを確認: `docker ps`
+- ポート 9999 が使用されていないことを確認
+- DBever 等の管理ツールを使用する際は 接続設定の DB 欄に appdb が入力されているか確認
 
 ## ライセンス
 
@@ -170,7 +204,6 @@ dotnet publish -c Release
 ## 連絡先
 
 - **作者**: T.U
-- **メール**: [your.email@example.com](mailto:your.email@example.com)
 
 ## 参考資料
 
