@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using EcSiteBackend.Application.Common.Interfaces;
 using EcSiteBackend.Application.Common.Interfaces.Repositories;
 using EcSiteBackend.Infrastructure.DbContext;

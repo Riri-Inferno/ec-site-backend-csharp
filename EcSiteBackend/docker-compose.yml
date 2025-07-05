@@ -1,12 +1,10 @@
-version: ""
-
 services:
   db:
     image: postgres:16
     container_name: ecsite-db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: supersecretpooppassword
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: appdb
     ports:
       - "9999:5432"
@@ -14,12 +12,18 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: ecsite-api
     ports:
-      - "5000:80"
+      - "8753:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=appdb;Username=postgres;Password=supersecretpooppassword
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=appdb;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - Jwt__Secret=${JWT_SECRET}
+      - Jwt__Issuer=EcSiteBackend
+      - Jwt__Audience=EcSiteBackendClient
+      - Jwt__ExpirationInMinutes=60
     depends_on:
       - db
 
