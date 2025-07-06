@@ -3,12 +3,12 @@ using EcSiteBackend.Application.Common.Constants;
 using EcSiteBackend.Application.Common.Exceptions;
 using EcSiteBackend.Application.Common.Interfaces;
 using EcSiteBackend.Application.Common.Interfaces.Repositories;
-using EcSiteBackend.Application.Common.Interfaces.Services;
 using EcSiteBackend.Application.Common.Settings;
 using EcSiteBackend.Application.DTOs;
 using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Domain.Entities;
+using Microsoft.Extensions.Options;
 
 namespace EcSiteBackend.Application.UseCases.Interactors
 {
@@ -21,7 +21,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
         private readonly IJwtService _jwtService;
         private readonly ITransactionService _transactionService;
         private readonly IPasswordService _passwordService;
-        private readonly IHistoryService _historyService;
+        private readonly IGenericRepository<LoginHistory> _loginHistoryRepository;
         private readonly JwtSettings _jwtSettings;
         private readonly IMapper _mapper;
 
@@ -32,28 +32,22 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             IJwtService jwtService,
             ITransactionService transactionService,
             IPasswordService passwordService,
-            IHistoryService historyService,
-            JwtSettings jwtSettings,
+            IGenericRepository<LoginHistory> loginHistoryRepository,
+            IOptions<JwtSettings> jwtSettings,
             IMapper mapper)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
             _transactionService = transactionService;
-            _historyService = historyService;
             _passwordService = passwordService;
-            _jwtSettings = jwtSettings;
+            _loginHistoryRepository = loginHistoryRepository;
+            _jwtSettings = jwtSettings.Value;
             _mapper = mapper;
         }
 
         /// <summary>
         /// サインインを実行する
         /// </summary>
-        /// <param name="input">サインイン情報入力</param>
-        /// <param name="cancellationToken">キャンセルトークン</param>
-        /// <returns>サインインしたユーザー情報</returns>
-        /// <exception cref="ValidationException">入力の検証に失敗した場合</exception>
-        /// <exception cref="NotFoundException">ユーザーが見つからない場合  </exception>
-        /// <exception cref="UnauthorizedException">認証に失敗した場合</exception>
         public async Task<AuthOutput> ExecuteAsync(SignInInput input, CancellationToken cancellationToken = default)
         {
             return await _transactionService.ExecuteAsync(async () =>
@@ -61,54 +55,66 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 // ユーザーの取得
                 var user = await _userRepository.GetByEmailAsync(input.Email, cancellationToken);
 
-                // ユーザーが存在しない、または無効な場合
-                if (user is null || !user.IsActive)
+                // ログイン履歴の記録（失敗も記録）
+                var loginHistory = new LoginHistory
                 {
-                    // セキュリティのため、詳細な理由は返さない
-                    throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
-                }
-
-                // パスワードの検証
-                if (!_passwordService.VerifyPassword(input.Password, user.PasswordHash))
-                {
-                    throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
-                }
-
-                // 最終ログイン日時更新
-                user.LastLoginAt = DateTime.UtcNow;
-                user.IsActive = true;
-                _userRepository.Update(user);
-
-                // ユーザー履歴の作成（ログインテーブル作るか？）
-                await _historyService.CreateUserHistoryAsync(
-                    user,
-                    Domain.Enums.OperationType.Update,
-                    user.Id,
-                    cancellationToken);
-                    
-                await _userRepository.SaveChangesAsync(cancellationToken);
-
-                // JWTトークンの生成
-                var token = _jwtService.GenerateToken(user);
-
-                return new AuthOutput
-                {
-                    User = _mapper.Map<UserDto>(user),
-                    Token = token,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes)
+                    UserId = user?.Id,
+                    Email = input.Email,
+                    AttemptedAt = DateTime.UtcNow,
+                    IsSuccess = false,
+                    FailureReason = null
                 };
-            }, cancellationToken);
-        }
 
-        /// <summary>
-        /// 入力値と登録値を比較しパスワードの検証を行う
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        private bool CheckPassword(User user, SignInInput input)
-        {
-            return _passwordService.VerifyPassword(input.Password, user.PasswordHash);
+                try
+                {
+                    // ユーザーが存在しない、または無効な場合
+                    if (user is null || !user.IsActive)
+                    {
+                        loginHistory.FailureReason = "User not found or inactive";
+                        await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
+                        await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
+                        
+                        throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
+                    }
+
+                    // パスワードの検証
+                    if (!_passwordService.VerifyPassword(input.Password, user.PasswordHash))
+                    {
+                        loginHistory.FailureReason = "Invalid password";
+                        await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
+                        await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
+                        
+                        throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
+                    }
+
+                    // ログイン成功
+                    loginHistory.IsSuccess = true;
+                    loginHistory.FailureReason = null;
+
+                    // 最終ログイン日時更新
+                    user.LastLoginAt = DateTime.UtcNow;
+                    _userRepository.Update(user);
+
+                    // ログイン履歴の保存
+                    await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
+                    await _userRepository.SaveChangesAsync(cancellationToken);
+                    await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
+
+                    // JWTトークンの生成
+                    var token = _jwtService.GenerateToken(user);
+
+                    return new AuthOutput
+                    {
+                        User = _mapper.Map<UserDto>(user),
+                        Token = token,
+                        ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes)
+                    };
+                }
+                catch(Exception)
+                {
+                    throw;
+                }
+            }, cancellationToken);
         }
     }
 }
