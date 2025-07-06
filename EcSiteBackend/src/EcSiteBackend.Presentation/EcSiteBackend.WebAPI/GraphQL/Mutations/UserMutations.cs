@@ -19,7 +19,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
         /// <param name="signUpUseCase">サインアップユースケースサービス</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
         /// <returns>作成されたユーザー情報</returns>
-        public async Task<SignUpOutput> SignUp(
+        public async Task<AuthOutput> SignUp(
             SignUpInputType input,
             [Service] ISignUpUseCase signUpUseCase,
             CancellationToken cancellationToken)
