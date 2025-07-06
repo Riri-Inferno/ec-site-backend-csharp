@@ -40,6 +40,7 @@ namespace EcSiteBackend.Infrastructure.DbContext
         public DbSet<UserCoupon> UserCoupons { get; set; }
         public DbSet<TaxRate> TaxRates { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }
+        public DbSet<LoginHistory> LoginHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -687,7 +688,7 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
-            
+
             // LoginHistory
             modelBuilder.Entity<LoginHistory>(entity =>
             {
@@ -698,11 +699,11 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.FailureReason).HasMaxLength(200);
                 entity.Property(e => e.DeviceInfo).HasMaxLength(100);
                 entity.Property(e => e.Browser).HasMaxLength(100);
-                
+
                 entity.HasIndex(e => e.Email);
                 entity.HasIndex(e => e.AttemptedAt);
                 entity.HasIndex(e => e.IsSuccess);
-                
+
                 entity.HasOne(e => e.User)
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
