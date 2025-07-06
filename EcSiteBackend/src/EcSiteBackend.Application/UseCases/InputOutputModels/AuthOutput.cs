@@ -7,8 +7,19 @@ namespace EcSiteBackend.Application.UseCases.InputOutputModels
     /// </summary>
     public class AuthOutput
     {
+        /// <summary>
+        /// 認証されたユーザー情報
+        /// </summary>
         public UserDto User { get; set; } = null!;
+
+        /// <summary>
+        /// 発行されたJWTトークン
+        /// </summary>
         public string Token { get; set; } = string.Empty;
+
+        /// <summary>
+        /// トークンの有効期限（UTC）
+        /// </summary>
         public DateTime ExpiresAt { get; set; }
     }
 }
