@@ -116,8 +116,8 @@ namespace EcSiteBackend.Interactors.UnitTests
                 });
 
             _transactionServiceMock
-                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task<SignUpOutput>>>(), It.IsAny<CancellationToken>()))
-                .Returns<Func<Task<SignUpOutput>>, CancellationToken>((func, ct) => func());
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task<AuthOutput>>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task<AuthOutput>>, CancellationToken>((func, ct) => func());
 
             // Act
             var result = await _interactor.ExecuteAsync(input);
@@ -175,8 +175,8 @@ namespace EcSiteBackend.Interactors.UnitTests
                 .ReturnsAsync(existingUser);
             
             _transactionServiceMock
-                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task<SignUpOutput>>>(), It.IsAny<CancellationToken>()))
-                .Returns<Func<Task<SignUpOutput>>, CancellationToken>((func, ct) => func());
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task<AuthOutput>>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task<AuthOutput>>, CancellationToken>((func, ct) => func());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ConflictException>(() => _interactor.ExecuteAsync(input));
@@ -203,8 +203,8 @@ namespace EcSiteBackend.Interactors.UnitTests
                 .ReturnsAsync((User?)null);
             
             _transactionServiceMock
-                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task<SignUpOutput>>>(), It.IsAny<CancellationToken>()))
-                .Returns<Func<Task<SignUpOutput>>, CancellationToken>((func, ct) => func());
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task<AuthOutput>>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task<AuthOutput>>, CancellationToken>((func, ct) => func());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ValidationException>(() => _interactor.ExecuteAsync(input));

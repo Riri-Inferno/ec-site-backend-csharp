@@ -38,7 +38,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             _mapper = mapper;
         }
 
-        public async Task<SignUpOutput> ExecuteAsync(SignUpInput input, CancellationToken cancellationToken = default)
+        public async Task<AuthOutput> ExecuteAsync(SignUpInput input, CancellationToken cancellationToken = default)
         {
             return await _transactionService.ExecuteAsync(async () =>
             {
@@ -63,7 +63,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 // JWT生成
                 var token = _jwtService.GenerateToken(user);
 
-                return new SignUpOutput
+                return new AuthOutput
                 {
                     User = _mapper.Map<UserDto>(user),
                     Token = token,
