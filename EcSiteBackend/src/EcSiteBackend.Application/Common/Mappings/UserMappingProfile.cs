@@ -1,5 +1,6 @@
 using AutoMapper;
 using EcSiteBackend.Application.DTOs;
+using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Domain.Entities;
 
 namespace EcSiteBackend.Application.Common.Mappings
@@ -16,6 +17,42 @@ namespace EcSiteBackend.Application.Common.Mappings
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
                 .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.DisplayName))
                 .ReverseMap();
+
+            // User → AuthOutput
+            CreateMap<User, AuthOutput>()
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src))
+                .ForMember(dest => dest.Token, opt => opt.Ignore())
+                .ForMember(dest => dest.ExpiresAt, opt => opt.Ignore())
+                .ReverseMap();
+
+            // SignUpInput → User（新規作成用）
+            CreateMap<SignUpInput, User>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
+                .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(_ => false))
+                .ForMember(dest => dest.LastLoginAt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false))
+                // Navigation properties
+                .ForMember(dest => dest.UserRoles, opt => opt.Ignore())
+                .ForMember(dest => dest.UserAddresses, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordResetTokens, opt => opt.Ignore())
+                .ForMember(dest => dest.Orders, opt => opt.Ignore())
+                .ForMember(dest => dest.Cart, opt => opt.Ignore())
+                .ForMember(dest => dest.Reviews, opt => opt.Ignore())
+                .ForMember(dest => dest.Favorites, opt => opt.Ignore())
+                .ForMember(dest => dest.UserCoupons, opt => opt.Ignore());
+                
+            // User → UserHistory（履歴保存用）
+            CreateMap<User, UserHistory>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.OriginalId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.OperatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+                .ForMember(dest => dest.OperationType, opt => opt.Ignore()) // 呼び出し時に設定
+                .ForMember(dest => dest.OperatedBy, opt => opt.Ignore()) // 呼び出し時に設定
+                .ForMember(dest => dest.OriginalUser, opt => opt.Ignore());
         }
     }
 }
