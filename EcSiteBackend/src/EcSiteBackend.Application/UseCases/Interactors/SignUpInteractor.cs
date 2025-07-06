@@ -11,7 +11,7 @@ using EcSiteBackend.Domain.Entities;
 namespace EcSiteBackend.Application.UseCases.Interactors
 {
     /// <summary>
-    /// ユーザー作成ユースケースの実装
+    /// サインアップユースケースの実装
     /// </summary>
     public class SignUpInteractor : ISignUpUseCase
     {

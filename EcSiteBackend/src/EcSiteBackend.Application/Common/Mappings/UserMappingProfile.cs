@@ -11,12 +11,11 @@ namespace EcSiteBackend.Application.Common.Mappings
     {
         public UserMappingProfile()
         {
-            // User → UserDto
+            // User ↔ UserDto
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.DisplayName));
-
-
+                .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.DisplayName))
+                .ReverseMap();
         }
     }
 }
