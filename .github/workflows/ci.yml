@@ -24,6 +24,12 @@ jobs:
           dotnet restore
           dotnet build --configuration Release
 
+      - name: Build on entrypoint
+        working-directory: EcSiteBackend/src/EcSiteBackend.Presentation/EcSiteBackend.WebAPI
+        run: |
+          dotnet restore
+          dotnet build --configuration Release
+
       - name: Run Tests
         working-directory: EcSiteBackend
         run: dotnet test --no-build --configuration Release --verbosity normal
