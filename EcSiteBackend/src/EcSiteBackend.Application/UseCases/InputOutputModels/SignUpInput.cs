@@ -29,5 +29,15 @@ namespace EcSiteBackend.Application.UseCases.InputOutputModels
         /// 電話番号（任意）
         /// </summary>
         public string? PhoneNumber { get; set; }
+
+        /// <summary>
+        /// IPアドレス
+        /// </summary>
+        public string? IpAddress { get; set; }
+
+        /// <summary>
+        /// ユーザーエージェント
+        /// </summary>
+        public string? UserAgent { get; set; }
     }
 }

@@ -30,7 +30,9 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
                 Password = input.Password,
                 FirstName = input.FirstName,
                 LastName = input.LastName,
-                PhoneNumber = input.PhoneNumber
+                PhoneNumber = input.PhoneNumber,
+                IpAddress = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
+                UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
             };
 
             return await signUpUseCase.ExecuteAsync(useCaseInput, cancellationToken);

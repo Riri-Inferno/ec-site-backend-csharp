@@ -3,10 +3,12 @@ using EcSiteBackend.Application.Common.Constants;
 using EcSiteBackend.Application.Common.Exceptions;
 using EcSiteBackend.Application.Common.Interfaces;
 using EcSiteBackend.Application.Common.Interfaces.Repositories;
+using EcSiteBackend.Application.Common.Settings;
 using EcSiteBackend.Application.DTOs;
 using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Domain.Entities;
+using Microsoft.Extensions.Options;
 
 namespace EcSiteBackend.Application.UseCases.Interactors
 {
@@ -17,24 +19,33 @@ namespace EcSiteBackend.Application.UseCases.Interactors
     {
         private readonly IUserRepository _userRepository;
         private readonly IGenericRepository<Cart> _cartRepository;
+        private readonly IGenericRepository<LoginHistory> _loginHistoryRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtService _jwtService;
         private readonly ITransactionService _transactionService;
+        private readonly IUserAgentParser _userAgentParser;
+        private readonly JwtSettings _jwtSettings;
         private readonly IMapper _mapper;
 
         public SignUpInteractor(
             IUserRepository userRepository,
             IGenericRepository<Cart> cartRepository,
+            IGenericRepository<LoginHistory> loginHistoryRepository,
             IPasswordHasher passwordHasher,
             IJwtService jwtService,
             ITransactionService transactionService,
+            IUserAgentParser userAgentParser,
+            IOptions<JwtSettings> jwtSettings,
             IMapper mapper)
         {
             _userRepository = userRepository;
             _cartRepository = cartRepository;
+            _loginHistoryRepository = loginHistoryRepository;
             _passwordHasher = passwordHasher;
             _jwtService = jwtService;
             _transactionService = transactionService;
+            _userAgentParser = userAgentParser;
+            _jwtSettings = jwtSettings.Value;
             _mapper = mapper;
         }
 
@@ -60,6 +71,22 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 await _cartRepository.AddAsync(cart, cancellationToken);
                 await _cartRepository.SaveChangesAsync(cancellationToken);
 
+                // 初回ログイン履歴の記録
+                var loginHistory = new LoginHistory
+                {
+                    UserId = user.Id,
+                    Email = user.Email,
+                    AttemptedAt = DateTime.UtcNow,
+                    IsSuccess = true,
+                    FailureReason = null,
+                    IpAddress = input.IpAddress,
+                    UserAgent = input.UserAgent,
+                    Browser = _userAgentParser.GetBrowser(input.UserAgent),
+                    DeviceInfo = _userAgentParser.GetDeviceInfo(input.UserAgent)
+                };
+                await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
+                await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
+
                 // JWT生成
                 var token = _jwtService.GenerateToken(user);
 
@@ -67,7 +94,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 {
                     User = _mapper.Map<UserDto>(user),
                     Token = token,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(60) // TODO: 設定から取得
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes)
                 };
             }, cancellationToken);
         }
