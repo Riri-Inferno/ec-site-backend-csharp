@@ -37,7 +37,29 @@ namespace EcSiteBackend.Infrastructure.Services
             if (string.IsNullOrEmpty(userAgent)) return null;
 
             var clientInfo = _uaParser.Parse(userAgent);
-            return clientInfo.Device.Family ?? "Unknown";
+            
+            // デバイスタイプを判定
+            if (clientInfo.Device.IsSpider) return "Bot";
+            
+            // UAParserはデバイスタイプを直接提供しないので、
+            // OSやUA文字列から推測
+            var ua = userAgent.ToLower();
+            var os = clientInfo.OS.Family?.ToLower() ?? "";
+            
+            if (ua.Contains("mobile") || ua.Contains("android") || os.Contains("android"))
+                return "Mobile";
+            
+            if (ua.Contains("tablet") || ua.Contains("ipad"))
+                return "Tablet";
+            
+            if (os.Contains("windows") || os.Contains("mac") || os.Contains("linux"))
+                return "Desktop";
+            
+            // Device.Familyがある場合はそれを返す
+            if (!string.IsNullOrEmpty(clientInfo.Device.Family) && clientInfo.Device.Family != "Other")
+                return clientInfo.Device.Family;
+            
+            return "Desktop"; // デフォルトはDesktop
         }
 
         /// <summary>
