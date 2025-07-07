@@ -67,6 +67,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IPasswordService, PasswordService>();
+            services.AddHttpContextAccessor();
 
             // 4. UseCases
             services.AddScoped<ISignUpUseCase, SignUpInteractor>();

@@ -35,5 +35,30 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
 
             return await signUpUseCase.ExecuteAsync(useCaseInput, cancellationToken);
         }
+
+        /// <summary>
+        /// ユーザー認証（サインイン）を実行するMutation
+        /// </summary>
+        /// <param name="input">サインイン入力情報（メールアドレス・パスワード）</param>
+        /// <param name="signInUseCase">サインインユースケースサービス</param>
+        /// <param name="httpContextAccessor">HTTPコンテキストアクセサ（IPアドレス・ユーザーエージェント取得用）</param>
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        /// <returns>認証結果（ユーザー情報・トークン等）</returns>
+        public async Task<AuthOutput> SignInAsync(
+            SignInInputType input,
+            [Service] ISignInUseCase signInUseCase,
+            [Service] IHttpContextAccessor httpContextAccessor,
+            CancellationToken cancellationToken)
+        {
+            var signInInput = new SignInInput
+            {
+                Email = input.Email,
+                Password = input.Password,
+                IpAddress = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
+                UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
+            };
+            
+            return await signInUseCase.ExecuteAsync(signInInput, cancellationToken);
+        }
     }
 }

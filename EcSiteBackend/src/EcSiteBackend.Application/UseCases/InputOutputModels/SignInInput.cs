@@ -14,5 +14,15 @@ namespace EcSiteBackend.Application.UseCases.InputOutputModels
         /// パスワード
         /// </summary>
         public string Password { get; set; } = string.Empty;
+
+        /// <summary>
+        /// IPアドレス
+        /// </summary>
+        public string? IpAddress { get; set; }
+
+        /// <summary>
+        /// ユーザーエージェント
+        /// </summary>
+        public string? UserAgent { get; set; }
     }
 }

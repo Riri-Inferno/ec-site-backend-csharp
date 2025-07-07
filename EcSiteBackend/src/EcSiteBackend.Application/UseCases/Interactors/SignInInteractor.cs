@@ -62,9 +62,10 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     Email = input.Email,
                     AttemptedAt = DateTime.UtcNow,
                     IsSuccess = false,
-                    FailureReason = null
+                    FailureReason = null,
+                    IpAddress = input.IpAddress,
+                    UserAgent = input.UserAgent
                 };
-
                 
                 // ユーザーが存在しない、または無効な場合
                 if (user is null || !user.IsActive)
