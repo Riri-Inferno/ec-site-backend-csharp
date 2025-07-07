@@ -70,6 +70,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 
             // 4. UseCases
             services.AddScoped<ISignUpUseCase, SignUpInteractor>();
+            services.AddScoped<ISignInUseCase, SignInInteractor>();
 
             // 5. AutoMapper
             services.AddAutoMapper(typeof(UserMappingProfile));
