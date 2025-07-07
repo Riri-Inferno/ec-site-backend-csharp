@@ -10,6 +10,9 @@ using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Application.UseCases.Interactors;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mappings;
 using EcSiteBackend.Application.Common.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -59,18 +62,23 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 
             // 2. Repositories
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped(typeof(IHistoryRepository<>), typeof(HistoryRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
 
             // 3. Services
             services.AddScoped<ITransactionService, TransactionService>();
-            services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IPasswordService, PasswordService>();
+            services.AddSingleton<IUserAgentParser, UserAgentParser>();
+            services.AddHttpContextAccessor();
 
             // 4. UseCases
             services.AddScoped<ISignUpUseCase, SignUpInteractor>();
+            services.AddScoped<ISignInUseCase, SignInInteractor>();
 
             // 5. AutoMapper
             services.AddAutoMapper(typeof(UserMappingProfile));
+            services.AddAutoMapper(typeof(GraphQLMappingProfile));
 
             // 6. MediatR（TODO）
             // services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(

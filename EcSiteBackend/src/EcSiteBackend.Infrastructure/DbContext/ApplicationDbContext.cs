@@ -40,6 +40,7 @@ namespace EcSiteBackend.Infrastructure.DbContext
         public DbSet<UserCoupon> UserCoupons { get; set; }
         public DbSet<TaxRate> TaxRates { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }
+        public DbSet<LoginHistory> LoginHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -614,16 +615,16 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.DiscountRate).HasPrecision(5, 2);
                 entity.Property(e => e.MaxDiscountAmount).HasPrecision(10, 2);
                 entity.Property(e => e.MinimumPurchaseAmount).HasPrecision(10, 2);
-                
+
                 entity.HasIndex(e => e.Code).IsUnique();
                 entity.HasIndex(e => e.ValidFrom);
                 entity.HasIndex(e => e.ValidTo);
-                
+
                 entity.HasOne(e => e.TargetCategory)
                     .WithMany()
                     .HasForeignKey(e => e.TargetCategoryId)
                     .OnDelete(DeleteBehavior.SetNull);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -632,25 +633,25 @@ namespace EcSiteBackend.Infrastructure.DbContext
             modelBuilder.Entity<UserCoupon>(entity =>
             {
                 entity.ToTable("user_coupons");
-                
+
                 entity.HasIndex(e => new { e.UserId, e.CouponId });
                 entity.HasIndex(e => e.IsUsed);
-                
+
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.UserCoupons)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 entity.HasOne(e => e.Coupon)
                     .WithMany(c => c.UserCoupons)
                     .HasForeignKey(e => e.CouponId)
                     .OnDelete(DeleteBehavior.Restrict);
-                
+
                 entity.HasOne(e => e.UsedOrder)
                     .WithMany()
                     .HasForeignKey(e => e.UsedOrderId)
                     .OnDelete(DeleteBehavior.SetNull);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -662,11 +663,11 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.Name).HasMaxLength(50).IsRequired();
                 entity.Property(e => e.Rate).HasPrecision(5, 2);
                 entity.Property(e => e.Description).HasMaxLength(200);
-                
+
                 entity.HasIndex(e => e.TaxType);
                 entity.HasIndex(e => e.EffectiveFrom);
                 entity.HasIndex(e => e.IsDefault);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
             });
@@ -680,12 +681,33 @@ namespace EcSiteBackend.Infrastructure.DbContext
                 entity.Property(e => e.Category).HasMaxLength(50).IsRequired();
                 entity.Property(e => e.DataType).HasMaxLength(20).IsRequired();
                 entity.Property(e => e.Description).HasMaxLength(500);
-                
+
                 entity.HasIndex(e => e.Key).IsUnique();
                 entity.HasIndex(e => e.Category);
-                
+
                 // 論理削除のグローバルフィルタ
                 entity.HasQueryFilter(e => !e.IsDeleted);
+            });
+
+            // LoginHistory
+            modelBuilder.Entity<LoginHistory>(entity =>
+            {
+                entity.ToTable("login_histories");
+                entity.Property(e => e.Email).HasMaxLength(256).IsRequired();
+                entity.Property(e => e.IpAddress).HasMaxLength(45); // IPv6対応
+                entity.Property(e => e.UserAgent).HasMaxLength(500);
+                entity.Property(e => e.FailureReason).HasMaxLength(200);
+                entity.Property(e => e.DeviceInfo).HasMaxLength(100);
+                entity.Property(e => e.Browser).HasMaxLength(100);
+
+                entity.HasIndex(e => e.Email);
+                entity.HasIndex(e => e.AttemptedAt);
+                entity.HasIndex(e => e.IsSuccess);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

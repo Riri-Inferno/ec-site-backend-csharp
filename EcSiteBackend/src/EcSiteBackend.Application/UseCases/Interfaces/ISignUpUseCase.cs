@@ -13,6 +13,6 @@ namespace EcSiteBackend.Application.UseCases.Interfaces
         /// <param name="input">ユーザー作成入力</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
         /// <returns>作成されたユーザー情報</returns>
-        Task<SignUpOutput> ExecuteAsync(SignUpInput input, CancellationToken cancellationToken = default);
+        Task<AuthOutput> ExecuteAsync(SignUpInput input, CancellationToken cancellationToken = default);
     }
 }

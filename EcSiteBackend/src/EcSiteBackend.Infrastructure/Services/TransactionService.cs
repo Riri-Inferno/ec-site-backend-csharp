@@ -25,7 +25,7 @@ namespace EcSiteBackend.Infrastructure.Services
             try
             {
                 var result = await action();
-                await transaction.CommitAsync(cancellationToken); // はい、Asyncがあります！
+                await transaction.CommitAsync(cancellationToken);
                 return result;
             }
             catch

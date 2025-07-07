@@ -1,9 +1,9 @@
 namespace EcSiteBackend.Application.UseCases.InputOutputModels
 {
     /// <summary>
-    /// ユーザー登録（サインアップ）時の入力モデル
+    /// サインイン時の入力モデル
     /// </summary>
-    public class SignUpInput
+    public class SignInInput
     {
         /// <summary>
         /// メールアドレス
@@ -14,21 +14,6 @@ namespace EcSiteBackend.Application.UseCases.InputOutputModels
         /// パスワード
         /// </summary>
         public string Password { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 名（First Name）
-        /// </summary>
-        public string FirstName { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 姓（Last Name）
-        /// </summary>
-        public string LastName { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 電話番号（任意）
-        /// </summary>
-        public string? PhoneNumber { get; set; }
 
         /// <summary>
         /// IPアドレス
