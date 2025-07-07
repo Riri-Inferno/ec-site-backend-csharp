@@ -75,6 +75,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
 
             // 5. AutoMapper
             services.AddAutoMapper(typeof(UserMappingProfile));
+            services.AddAutoMapper(typeof(GraphQLMappingProfile));
 
             // 6. MediatR（TODO）
             // services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
