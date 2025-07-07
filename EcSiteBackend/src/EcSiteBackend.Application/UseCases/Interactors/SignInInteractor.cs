@@ -65,55 +65,49 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     FailureReason = null
                 };
 
-                try
+                
+                // ユーザーが存在しない、または無効な場合
+                if (user is null || !user.IsActive)
                 {
-                    // ユーザーが存在しない、または無効な場合
-                    if (user is null || !user.IsActive)
-                    {
-                        loginHistory.FailureReason = "User not found or inactive";
-                        await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
-                        await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
-                        
-                        throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
-                    }
-
-                    // パスワードの検証
-                    if (!_passwordService.VerifyPassword(input.Password, user.PasswordHash))
-                    {
-                        loginHistory.FailureReason = "Invalid password";
-                        await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
-                        await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
-                        
-                        throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
-                    }
-
-                    // ログイン成功
-                    loginHistory.IsSuccess = true;
-                    loginHistory.FailureReason = null;
-
-                    // 最終ログイン日時更新
-                    user.LastLoginAt = DateTime.UtcNow;
-                    _userRepository.Update(user);
-
-                    // ログイン履歴の保存
+                    loginHistory.FailureReason = "User not found or inactive";
                     await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
-                    await _userRepository.SaveChangesAsync(cancellationToken);
                     await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
-
-                    // JWTトークンの生成
-                    var token = _jwtService.GenerateToken(user);
-
-                    return new AuthOutput
-                    {
-                        User = _mapper.Map<UserDto>(user),
-                        Token = token,
-                        ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes)
-                    };
+                    
+                    throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
                 }
-                catch(Exception)
+
+                // パスワードの検証
+                if (!_passwordService.VerifyPassword(input.Password, user.PasswordHash))
                 {
-                    throw;
+                    loginHistory.FailureReason = "Invalid password";
+                    await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
+                    await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
+                    
+                    throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
                 }
+
+                // ログイン成功
+                loginHistory.IsSuccess = true;
+                loginHistory.FailureReason = null;
+
+                // 最終ログイン日時更新
+                user.LastLoginAt = DateTime.UtcNow;
+                _userRepository.Update(user);
+
+                // ログイン履歴の保存
+                await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
+                await _userRepository.SaveChangesAsync(cancellationToken);
+                await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
+
+                // JWTトークンの生成
+                var token = _jwtService.GenerateToken(user);
+
+                return new AuthOutput
+                {
+                    User = _mapper.Map<UserDto>(user),
+                    Token = token,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes)
+                };             
             }, cancellationToken);
         }
     }
