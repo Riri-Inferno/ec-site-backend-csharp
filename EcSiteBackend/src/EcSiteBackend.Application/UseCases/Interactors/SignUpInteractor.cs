@@ -20,7 +20,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
         private readonly IUserRepository _userRepository;
         private readonly IGenericRepository<Cart> _cartRepository;
         private readonly IGenericRepository<LoginHistory> _loginHistoryRepository;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly IPasswordService _passwordService;
         private readonly IJwtService _jwtService;
         private readonly ITransactionService _transactionService;
         private readonly IUserAgentParser _userAgentParser;
@@ -31,7 +31,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             IUserRepository userRepository,
             IGenericRepository<Cart> cartRepository,
             IGenericRepository<LoginHistory> loginHistoryRepository,
-            IPasswordHasher passwordHasher,
+            IPasswordService passwordService,
             IJwtService jwtService,
             ITransactionService transactionService,
             IUserAgentParser userAgentParser,
@@ -41,7 +41,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             _userRepository = userRepository;
             _cartRepository = cartRepository;
             _loginHistoryRepository = loginHistoryRepository;
-            _passwordHasher = passwordHasher;
+            _passwordService = passwordService;
             _jwtService = jwtService;
             _transactionService = transactionService;
             _userAgentParser = userAgentParser;
@@ -120,7 +120,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             return new User
             {
                 Email = input.Email,
-                PasswordHash = _passwordHasher.HashPassword(input.Password),
+                PasswordHash = _passwordService.HashPassword(input.Password),
                 FirstName = input.FirstName,
                 LastName = input.LastName,
                 PhoneNumber = input.PhoneNumber,

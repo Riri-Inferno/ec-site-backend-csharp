@@ -22,9 +22,10 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
         public async Task<AuthOutput> SignUp(
             SignUpInputType input,
             [Service] ISignUpUseCase signUpUseCase,
+            [Service] IHttpContextAccessor httpContextAccessor,
             CancellationToken cancellationToken)
         {
-            var useCaseInput = new SignUpInput
+            var signUpInput = new SignUpInput
             {
                 Email = input.Email,
                 Password = input.Password,
@@ -35,7 +36,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
                 UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
             };
 
-            return await signUpUseCase.ExecuteAsync(useCaseInput, cancellationToken);
+            return await signUpUseCase.ExecuteAsync(signUpInput, cancellationToken);
         }
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
         /// <param name="httpContextAccessor">HTTPコンテキストアクセサ（IPアドレス・ユーザーエージェント取得用）</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
         /// <returns>認証結果（ユーザー情報・トークン等）</returns>
-        public async Task<AuthOutput> SignInAsync(
+        public async Task<AuthOutput> SignIn(
             SignInInputType input,
             [Service] ISignInUseCase signInUseCase,
             [Service] IHttpContextAccessor httpContextAccessor,
