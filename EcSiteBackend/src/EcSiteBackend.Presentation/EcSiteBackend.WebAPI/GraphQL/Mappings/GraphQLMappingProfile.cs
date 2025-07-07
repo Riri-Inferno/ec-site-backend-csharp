@@ -1,4 +1,8 @@
 using AutoMapper;
+using EcSiteBackend.Application.DTOs;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types;
+using EcSiteBackend.Application.UseCases.InputOutputModels;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mappings
 {

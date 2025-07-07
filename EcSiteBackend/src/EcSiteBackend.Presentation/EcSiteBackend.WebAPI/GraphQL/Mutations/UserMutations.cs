@@ -3,7 +3,7 @@ using EcSiteBackend.Application.DTOs;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
-using autoMapper;
+using AutoMapper;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads;
 
