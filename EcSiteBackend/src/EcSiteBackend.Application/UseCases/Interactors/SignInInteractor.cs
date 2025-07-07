@@ -23,6 +23,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
         private readonly IPasswordService _passwordService;
         private readonly IGenericRepository<LoginHistory> _loginHistoryRepository;
         private readonly JwtSettings _jwtSettings;
+        private readonly IUserAgentParser _userAgentParser;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             IPasswordService passwordService,
             IGenericRepository<LoginHistory> loginHistoryRepository,
             IOptions<JwtSettings> jwtSettings,
+            IUserAgentParser userAgentParser,
             IMapper mapper)
         {
             _userRepository = userRepository;
@@ -42,6 +44,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             _passwordService = passwordService;
             _loginHistoryRepository = loginHistoryRepository;
             _jwtSettings = jwtSettings.Value;
+            _userAgentParser = userAgentParser;
             _mapper = mapper;
         }
 
@@ -64,7 +67,9 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     IsSuccess = false,
                     FailureReason = null,
                     IpAddress = input.IpAddress,
-                    UserAgent = input.UserAgent
+                    UserAgent = input.UserAgent,
+                    Browser = _userAgentParser.GetBrowser(input.UserAgent),
+                    DeviceInfo = _userAgentParser.GetDeviceInfo(input.UserAgent)
                 };
                 
                 // ユーザーが存在しない、または無効な場合
