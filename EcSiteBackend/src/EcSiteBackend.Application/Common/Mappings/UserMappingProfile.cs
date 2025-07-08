@@ -27,23 +27,18 @@ namespace EcSiteBackend.Application.Common.Mappings
 
             // SignUpInput → User（新規作成用）
             CreateMap<SignUpInput, User>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ConfigureAuditableEntity() // 監査エンティティを自動設定
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
                 .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(_ => false))
                 .ForMember(dest => dest.LastLoginAt, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false))
-                // Navigation properties
-                .ForMember(dest => dest.UserRoles, opt => opt.Ignore())
-                .ForMember(dest => dest.UserAddresses, opt => opt.Ignore())
-                .ForMember(dest => dest.PasswordResetTokens, opt => opt.Ignore())
-                .ForMember(dest => dest.Orders, opt => opt.Ignore())
-                .ForMember(dest => dest.Cart, opt => opt.Ignore())
-                .ForMember(dest => dest.Reviews, opt => opt.Ignore())
-                .ForMember(dest => dest.Favorites, opt => opt.Ignore())
-                .ForMember(dest => dest.UserCoupons, opt => opt.Ignore());
+                .IgnoreAllNavigationProperties();
+
+            // UpdateUserInput → User（更新用）
+            // CreateMap<UpdateUserInput, User>()
+            //     .ConfigureAuditableEntity(isUpdate: true)
+            //     .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+            //     .IgnoreAllNavigationProperties();
                 
             // User → UserHistory（履歴保存用）
             CreateMap<User, UserHistory>()
