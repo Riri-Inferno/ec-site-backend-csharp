@@ -57,7 +57,8 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 await ValidateInputAsync(input, cancellationToken);
 
                 // ユーザー作成
-                var user = CreateUserEntity(input);
+                var user = _mapper.Map<User>(input);
+                user.PasswordHash = _passwordService.HashPassword(input.Password);
                 await _userRepository.AddAsync(user, cancellationToken);
                 await _userRepository.SaveChangesAsync(cancellationToken);
 
@@ -66,13 +67,13 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 {
                     UserId = user.Id,
                     LastActivityAt = DateTime.UtcNow,
-                    CreatedAt = DateTime.UtcNow
                 };
+                cart = _mapper.Map<Cart>(cart); // 監査フィールドを自動設定
                 await _cartRepository.AddAsync(cart, cancellationToken);
                 await _cartRepository.SaveChangesAsync(cancellationToken);
 
                 // 初回ログイン履歴の記録
-                var loginHistory = new LoginHistory
+                var loginHistoryInput = new LoginHistory
                 {
                     UserId = user.Id,
                     Email = user.Email,
@@ -84,6 +85,10 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     Browser = _userAgentParser.GetBrowser(input.UserAgent),
                     DeviceInfo = _userAgentParser.GetDeviceInfo(input.UserAgent)
                 };
+
+                // 監査フィールドを自動設定
+                var loginHistory = _mapper.Map<LoginHistory>(loginHistoryInput);
+
                 await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
                 await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
 
@@ -113,21 +118,6 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             {
                 throw new ValidationException("password", ErrorMessages.PasswordTooWeak);
             }
-        }
-
-        private User CreateUserEntity(SignUpInput input)
-        {
-            return new User
-            {
-                Email = input.Email,
-                PasswordHash = _passwordService.HashPassword(input.Password),
-                FirstName = input.FirstName,
-                LastName = input.LastName,
-                PhoneNumber = input.PhoneNumber,
-                IsActive = true,
-                EmailConfirmed = false,
-                CreatedAt = DateTime.UtcNow
-            };
         }
     }
 }
