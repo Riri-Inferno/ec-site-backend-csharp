@@ -59,7 +59,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 var user = await _userRepository.GetByEmailAsync(input.Email, cancellationToken);
 
                 // ログイン履歴の記録（失敗も記録）
-                var loginHistory = new LoginHistory
+                var loginHistoryInput = new LoginHistory
                 {
                     UserId = user?.Id,
                     Email = input.Email,
@@ -71,6 +71,9 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     Browser = _userAgentParser.GetBrowser(input.UserAgent),
                     DeviceInfo = _userAgentParser.GetDeviceInfo(input.UserAgent)
                 };
+
+                // AutoMapperで監査フィールドを自動設定
+                var loginHistory = _mapper.Map<LoginHistory>(loginHistoryInput);
                 
                 // ユーザーが存在しない、または無効な場合
                 if (user is null || !user.IsActive)
