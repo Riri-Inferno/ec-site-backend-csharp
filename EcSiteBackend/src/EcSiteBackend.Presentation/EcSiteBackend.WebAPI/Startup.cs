@@ -80,6 +80,8 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 cfg.AddProfile<UserMappingProfile>();
                 cfg.AddProfile<GraphQLMappingProfile>();
                 cfg.AddProfile<BaseEntityMappingProfile>();
+                cfg.AddProfile<LoginHistoryMappingProfile>();
+                cfg.AddProfile<CartMappingProfile>();
             });
 
             // 6. MediatR（TODO）
