@@ -13,7 +13,9 @@ namespace EcSiteBackend.Application.Common.Mappings
         {
             // 監査フィールドを設定
             CreateMap<LoginHistory, LoginHistory>()
-                .ConfigureAuditableEntity();
+                .ConfigureAuditableEntity()
+                .ForMember(dest => dest.Id, opt => opt.Condition((src, dest) => dest.Id == Guid.Empty))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

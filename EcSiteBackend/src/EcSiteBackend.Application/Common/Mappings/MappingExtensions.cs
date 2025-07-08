@@ -17,7 +17,8 @@ namespace EcSiteBackend.Application.Common.Mappings
             {
                 // 更新時の設定
                 mappingExpression
-                    .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(9))))                    .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
+                    .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+                    .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
                     .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                     .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
                     .ForMember(dest => dest.Id, opt => opt.Ignore());
@@ -27,7 +28,7 @@ namespace EcSiteBackend.Application.Common.Mappings
                 // 新規作成時の設定
                 mappingExpression
                     .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
-                    .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(9))))
+                    .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
                     .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
                     .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
                     .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
