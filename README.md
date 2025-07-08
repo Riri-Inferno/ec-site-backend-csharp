@@ -41,23 +41,50 @@ git clone https://github.com/Riri-Inferno/ec-site-backend-csharp.git
 cd ec-site-backend-csharp
 ```
 
+
+
 ### 2. 必要なファイルの準備
 
 #### `.env` ファイルの作成
 
-プロジェクトルートに `.env` ファイルを作成し、以下の内容を記述してください：
+プロジェクトルートに **`.env`** ファイルを作成し、以下の内容を記述してください。
+
+**重要**:
+
+  * `JWTSettings__Secret` は、**64文字以上の安全な文字列**を設定してください。
+  * `POSTGRES_PASSWORD` と `ConnectionStrings__DefaultConnection` のパスワードは一致させてください。
+  * `ConnectionStrings__DefaultConnection` の `Host` は、Docker Compose ネットワーク内のデータベースサービス名 (`db`) を指定してください。
 
 ```env
 # JWT シークレットキー（64文字以上の安全な文字列を設定）
-JWT_SECRET="your-jwt-secret-key-here"
+JWTSettings__Secret="your-64-character-safe-jwt-secret-key-here-xxxxxxxxxxxxxxxxxxxxxxxx"
+
+# JWT トークンの有効期限（分単位）
+JWTSettings__ExpirationInMinutes=60
+
+# JWT Issuer (発行者)v
+JWTSettings__Issuer="EcSiteBackend"
+
+# JWT Audience (対象利用者)
+JWTSettings__Audience="EcSiteBackendClient"
 
 # PostgreSQL データベースのパスワード
 POSTGRES_PASSWORD="your-database-password"
+
+# データベース接続文字列 (Docker コンテナ用)
+# Host は docker-compose.yml で定義された 'db' サービス名と一致させる
+ConnectionStrings__DefaultConnection="Host=db;Port=5432;Database=appdb;Username=postgres;Password=${POSTGRES_PASSWORD}"
 ```
 
 #### `secrets.json` ファイルの作成
 
-開発環境用の設定ファイルを作成します：
+開発環境（ローカル実行時）用の設定ファイルです。プロジェクトの適切な場所にこのファイルを作成し、以下の内容を記述してください。
+
+**重要**:
+
+  * `JwtSettings.Secret` は、**64文字以上の安全な文字列**を設定してください。
+  * `ConnectionStrings.DefaultConnection` の `Password` は `POSTGRES_PASSWORD` と一致させてください。
+  * `ConnectionStrings.DefaultConnection` の `Host` は、ローカル開発環境でPostgreSQLが動作しているホスト (`localhost` など) を指定してください。
 
 ```json
 {
@@ -71,7 +98,7 @@ POSTGRES_PASSWORD="your-database-password"
     }
   },
   "JwtSettings": {
-    "Secret": "your-jwt-secret-key-here",
+    "Secret": "your-64-character-safe-jwt-secret-key-here-xxxxxxxxxxxxxxxxxxxxxxxx",
     "Issuer": "EcSiteBackend",
     "Audience": "EcSiteBackendClient",
     "ExpirationInMinutes": 60
@@ -80,12 +107,22 @@ POSTGRES_PASSWORD="your-database-password"
 }
 ```
 
-### 3. Docker 環境の起動（開発時はこちらを推奨、マイグレは別途行ってください）
+### 3. Docker 環境の起動（開発時はこちらを推奨、マイグレーションは別途行ってください）
+
+Docker Compose を使用してコンテナを起動します。`api` サービスは常に最新のコードでビルドされるように、キャッシュを無効にしてビルドします。
 
 ```bash
-cd EcSiteBackend
+# 既存のコンテナを停止・削除
+docker compose down
+
+# 'api' サービスをキャッシュなしでビルド（変更が頻繁なため推奨）
+docker compose build --no-cache api
+
+# 全てのサービスを起動（'api' は既にビルド済み、'db' は既存があれば利用）
 docker compose up -d
 ```
+
+
 
 ### 4. パッケージの復元
 
@@ -112,8 +149,9 @@ dotnet run
 ## GraphQL の使用方法
 
 ### GraphQL エンドポイント
+Dockerで起動した場合デフォルトで以下URLに公開されます
 
-- **エンドポイント URL**: `http://localhost:5000/graphql`
+  - **エンドポイント URL**: `http://localhost:8753/graphql`
 
 ### GraphQL Playground のアクセス
 
@@ -121,8 +159,85 @@ dotnet run
 
 ### サンプルクエリ
 
+いくつかの基本的な操作を行うためのサンプルクエリです。Banana Cake Pop でこれらのクエリをコピー＆ペーストして試すことができます。
+
+#### ユーザー登録 (signUp)
+
+新しいユーザーアカウントを作成します。
+
 ```graphql
-/* 準備中 */
+mutation {
+  signUp(
+    input: {
+      email: "your.email@hoge.com" # 適切なメールアドレスに変更してください
+      firstName: "Mieken"
+      lastName: "Nyan"
+      password: "YourStrongPassword" # 強力なパスワードを設定してください
+      phoneNumber: "111-2222-4444"
+    }
+  ) {
+    expiresAt
+    token
+    user {
+      createdAt
+      displayName
+      email
+      emailConfirmed
+      firstName
+      fullName
+      id
+      isActive
+      lastLoginAt
+      lastName
+      phoneNumber
+      updatedAt
+    }
+    errors {
+      code
+      field
+      message
+    }
+    success
+  }
+}
+```
+
+#### ユーザーログイン (signIn)
+
+既存のユーザーアカウントでログインし、JWTトークンを取得します。
+
+```graphql
+mutation {
+  signIn(
+    input: {
+      email: "your.email@hoge.com" # 登録済みのメールアドレスに変更してください
+      password: "YourStrongPassword" # 登録したパスワードを入力してください
+    }
+  ) {
+    expiresAt
+    success
+    token
+    errors {
+      code
+      field
+      message
+    }
+    user {
+      createdAt
+      displayName
+      email
+      emailConfirmed
+      firstName
+      fullName
+      id
+      isActive
+      lastLoginAt
+      lastName
+      phoneNumber
+      updatedAt
+    }
+  }
+}
 ```
 
 ## 認証
