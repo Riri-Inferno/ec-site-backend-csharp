@@ -53,16 +53,16 @@ namespace EcSiteBackend.Application.DTOs
         /// <summary>
         /// 最終ログイン日時
         /// </summary>
-        public DateTime? LastLoginAt { get; set; }
+        public DateTimeOffset? LastLoginAt { get; set; }
 
         /// <summary>
         /// 作成日時
         /// </summary>
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// 更新日時
         /// </summary>
-        public DateTime? UpdatedAt { get; set; }
+        public DateTimeOffset? UpdatedAt { get; set; }
     }
 }
