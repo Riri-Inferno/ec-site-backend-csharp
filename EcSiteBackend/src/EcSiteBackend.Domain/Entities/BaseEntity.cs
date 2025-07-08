@@ -13,7 +13,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 作成日時
         /// </summary>
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// 作成者ID
@@ -23,7 +23,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 更新日時
         /// </summary>
-        public DateTime? UpdatedAt { get; set; }
+        public DateTimeOffset? UpdatedAt { get; set; }
 
         /// <summary>
         /// 更新者ID
@@ -38,7 +38,7 @@ namespace EcSiteBackend.Domain.Entities
         /// <summary>
         /// 削除日時
         /// </summary>
-        public DateTime? DeletedAt { get; set; }
+        public DateTimeOffset? DeletedAt { get; set; }
 
         /// <summary>
         /// 削除者ID
