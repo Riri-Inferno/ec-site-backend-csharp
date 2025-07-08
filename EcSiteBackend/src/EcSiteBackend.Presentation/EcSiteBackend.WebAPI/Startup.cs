@@ -75,8 +75,12 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<ISignInUseCase, SignInInteractor>();
 
             // 5. AutoMapper
-            services.AddAutoMapper(typeof(UserMappingProfile));
-            services.AddAutoMapper(typeof(GraphQLMappingProfile));
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<UserMappingProfile>();
+                cfg.AddProfile<GraphQLMappingProfile>();
+                cfg.AddProfile<BaseEntityMappingProfile>();
+            });
 
             // 6. MediatR（TODO）
             // services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
