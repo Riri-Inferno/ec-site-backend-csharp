@@ -2,22 +2,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy solution and project files
-COPY EcSiteBackend.sln .
-COPY src/EcSiteBackend.Domain/*.csproj ./src/EcSiteBackend.Domain/
-COPY src/EcSiteBackend.Application/*.csproj ./src/EcSiteBackend.Application/
-COPY src/EcSiteBackend.Infrastructure/*.csproj ./src/EcSiteBackend.Infrastructure/
-COPY src/EcSiteBackend.Presentation/EcSiteBackend.WebAPI/*.csproj ./src/EcSiteBackend.Presentation/EcSiteBackend.WebAPI/
-COPY tests/EcSiteBackend.UnitTests/*.csproj ./tests/EcSiteBackend.UnitTests/
-COPY tests/EcSiteBackend.IntegrationTests/*.csproj ./tests/EcSiteBackend.IntegrationTests/
-
-# Restore dependencies
+# Copy solution and restore
+COPY EcSiteBackend.sln ./
+COPY . ./
 RUN dotnet restore
 
-# Copy everything else from the solution root
-COPY . .
-
-# Build the application
+# Build the app
 WORKDIR /src/src/EcSiteBackend.Presentation/EcSiteBackend.WebAPI
 RUN dotnet build -c Release -o /app/build
 

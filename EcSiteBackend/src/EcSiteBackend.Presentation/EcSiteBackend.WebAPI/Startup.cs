@@ -10,8 +10,6 @@ using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Application.UseCases.Interactors;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters;
-using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
-using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mappings;
 using EcSiteBackend.Application.Common.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
