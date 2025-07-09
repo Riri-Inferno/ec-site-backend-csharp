@@ -12,8 +12,7 @@ namespace EcSiteBackend.Application.Common.Mappings
         {
             // すべてのBaseEntity派生クラスに適用される共通設定
             CreateMap<BaseEntity, BaseEntity>()
-                .IncludeAllDerived()
-                .ForMember(dest => dest.RowVersion, opt => opt.Ignore());
+                .IncludeAllDerived();
         }
     }
 }

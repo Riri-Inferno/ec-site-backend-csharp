@@ -2,6 +2,7 @@ using EcSiteBackend.Application.Common.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using EcSiteBackend.Infrastructure.DbContext;
 using EcSiteBackend.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace EcSiteBackend.Infrastructure.Persistence.Repositories
 {
@@ -12,7 +13,8 @@ namespace EcSiteBackend.Infrastructure.Persistence.Repositories
     public class HistoryRepository<THistory> : GenericRepository<THistory>, IHistoryRepository<THistory>
         where THistory : HistoryEntity
     {
-        public HistoryRepository(ApplicationDbContext context) : base(context)
+        public HistoryRepository(ApplicationDbContext context, ILogger<GenericRepository<THistory>> logger)
+            : base(context, logger)
         {
         }
 

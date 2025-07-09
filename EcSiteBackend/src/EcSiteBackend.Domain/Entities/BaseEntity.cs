@@ -44,10 +44,5 @@ namespace EcSiteBackend.Domain.Entities
         /// 削除者ID
         /// </summary>
         public Guid? DeletedBy { get; set; }
-
-        /// <summary>
-        /// 楽観的同時実行制御用
-        /// </summary>
-        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     }
 }
