@@ -46,6 +46,20 @@ namespace EcSiteBackend.Infrastructure.DbContext
         {
             base.OnModelCreating(modelBuilder);
 
+            // BaseEntityを継承するすべてのエンティティにxminマッピングを設定
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property<uint>("Xmin")
+                        .HasColumnName("xmin")
+                        .HasColumnType("xid")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .IsConcurrencyToken();
+                }
+            }
+
             // User
             modelBuilder.Entity<User>(entity =>
             {
