@@ -54,6 +54,123 @@ namespace EcSiteBackend.Interactors.UnitTests
             );
         }
 
+        [Fact(DisplayName ="正常系: 入力が有効な場合、ログイン履歴が作成され、トークンが帰る")]
+
+        public async Task SignIn_ShouldCreateLoginHistoryAndReturnToken_WhenInputIsValid()
+        {
+            // Arrange
+            var input = new SignInInput
+            {
+                Email = "test@example.com",
+                Password = "Password123",
+                IpAddress = "127.0.0.1",
+                UserAgent = "TestAgent/1.0"
+            };
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Email = input.Email,
+                IsActive = true,
+                PasswordHash = "hashed-password"
+            };
+            var expectedToken = "dummy-jwt-token";
+            var expectedBrowser = "TestBrowser";
+            var expectedDeviceInfo = "TestDevice";
+
+            _userRepositoryMock
+                .Setup(r => r.GetByEmailAsync(input.Email, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(user);
+
+            _passwordServiceMock
+                .Setup(p => p.VerifyPassword(input.Password, user.PasswordHash))
+                .Returns(true);
+
+            _jwtServiceMock
+                .Setup(j => j.GenerateToken(user))
+                .Returns(expectedToken);
+
+            _userAgentParserMock.Setup(p => p.GetBrowser(It.IsAny<string>())).Returns(expectedBrowser);
+            _userAgentParserMock.Setup(p => p.GetDeviceInfo(It.IsAny<string>())).Returns(expectedDeviceInfo);
+
+            LoginHistory? capturedLoginHistory = null;
+            _loginHistoryRepositoryMock
+                .Setup(r => r.AddAsync(It.IsAny<LoginHistory>(), It.IsAny<CancellationToken>()))
+                .Callback<LoginHistory, CancellationToken>((lh, _) => capturedLoginHistory = lh)
+                .Returns(Task.CompletedTask);
+            _loginHistoryRepositoryMock
+                .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(1);
+
+            _userRepositoryMock
+                .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(1);
+
+            _mapperMock
+                .Setup(m => m.Map<LoginHistory>(It.IsAny<LoginHistory>()))
+                .Returns<LoginHistory>(lh => new LoginHistory
+                {
+                    UserId = lh.UserId,
+                    Email = lh.Email,
+                    AttemptedAt = lh.AttemptedAt,
+                    IsSuccess = lh.IsSuccess,
+                    FailureReason = lh.FailureReason,
+                    IpAddress = lh.IpAddress,
+                    UserAgent = lh.UserAgent,
+                    Browser = lh.Browser,
+                    DeviceInfo = lh.DeviceInfo
+                });
+
+            _mapperMock
+                .Setup(m => m.Map<UserDto>(It.IsAny<User>()))
+                .Returns<User>(u => new UserDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    PhoneNumber = u.PhoneNumber,
+                    IsActive = u.IsActive,
+                    EmailConfirmed = u.EmailConfirmed
+                });
+
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task<AuthOutput>>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task<AuthOutput>>, CancellationToken>((func, ct) => func());
+
+            // Act
+            var result = await _interactor.ExecuteAsync(input);
+
+            // Assert - 戻り値の検証
+            Assert.NotNull(result);
+            Assert.Equal(expectedToken, result.Token);
+            Assert.NotNull(result.User);
+            Assert.Equal(user.Id, result.User.Id);
+            Assert.Equal(user.Email, result.User.Email);
+            Assert.True(result.ExpiresAt > DateTime.UtcNow);
+
+            // Assert - LoginHistoryの内容検証
+            Assert.NotNull(capturedLoginHistory);
+            Assert.Equal(user.Id, capturedLoginHistory.UserId);
+            Assert.Equal(input.Email, capturedLoginHistory.Email);
+            Assert.True(capturedLoginHistory.IsSuccess);
+            Assert.Null(capturedLoginHistory.FailureReason);
+            Assert.Equal(input.IpAddress, capturedLoginHistory.IpAddress);
+            Assert.Equal(input.UserAgent, capturedLoginHistory.UserAgent);
+            Assert.Equal(expectedBrowser, capturedLoginHistory.Browser);
+            Assert.Equal(expectedDeviceInfo, capturedLoginHistory.DeviceInfo);
+
+            // 呼び出し検証
+            _userRepositoryMock.Verify(r => r.GetByEmailAsync(input.Email, It.IsAny<CancellationToken>()), Times.Once);
+            _passwordServiceMock.Verify(p => p.VerifyPassword(input.Password, user.PasswordHash), Times.Once);
+            _loginHistoryRepositoryMock.Verify(r => r.AddAsync(It.IsAny<LoginHistory>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+            _loginHistoryRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+            _userRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _jwtServiceMock.Verify(j => j.GenerateToken(user), Times.Once);
+            _mapperMock.Verify(m => m.Map<UserDto>(It.IsAny<User>()), Times.Once);
+            _userAgentParserMock.Verify(p => p.GetBrowser(It.IsAny<string>()), Times.Once);
+            _userAgentParserMock.Verify(p => p.GetDeviceInfo(It.IsAny<string>()), Times.Once);
+        }
+
         [Fact(DisplayName = "異常系: ユーザーが存在しない場合、UnauthorizedExceptionがスローされ履歴が記録される")]
         public async Task SignIn_ShouldThrowUnauthorizedException_WhenUserNotFound()
         {
