@@ -74,6 +74,12 @@ namespace EcSiteBackend.Infrastructure.Persistence.Repositories
             _dbSet.Remove(entity);
         }
 
+        /// <summary>
+        /// 変更を非同期で保存
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="ConcurrencyException"></exception>
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         {
             try
