@@ -27,6 +27,9 @@ namespace EcSiteBackend.Application.UseCases.Interactors
         private readonly JwtSettings _jwtSettings;
         private readonly IMapper _mapper;
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public SignUpInteractor(
             IUserRepository userRepository,
             IGenericRepository<Cart> cartRepository,
@@ -48,7 +51,13 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             _jwtSettings = jwtSettings.Value;
             _mapper = mapper;
         }
-
+        
+        /// <summary>
+        /// サインアップする
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<AuthOutput> ExecuteAsync(SignUpInput input, CancellationToken cancellationToken = default)
         {
             return await _transactionService.ExecuteAsync(async () =>
