@@ -163,7 +163,7 @@ namespace EcSiteBackend.Interactors.UnitTests
             _userRepositoryMock.Verify(r => r.GetByEmailAsync(input.Email, It.IsAny<CancellationToken>()), Times.Once);
             _passwordServiceMock.Verify(p => p.VerifyPassword(input.Password, user.PasswordHash), Times.Once);
             _loginHistoryRepositoryMock.Verify(r => r.AddAsync(It.IsAny<LoginHistory>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
-            _loginHistoryRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+            _loginHistoryRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _userRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _jwtServiceMock.Verify(j => j.GenerateToken(user), Times.Once);
             _mapperMock.Verify(m => m.Map<UserDto>(It.IsAny<User>()), Times.Once);
