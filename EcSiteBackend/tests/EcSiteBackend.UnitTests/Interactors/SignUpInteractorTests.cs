@@ -79,9 +79,11 @@ namespace EcSiteBackend.Interactors.UnitTests
             User? capturedUser = null;
             Cart? capturedCart = null;
             LoginHistory? capturedLoginHistory = null;
+            
             // UserAgentParserの戻り値
             var expectedBrowser = "TestBrowser";
             var expectedDeviceInfo = "TestDevice";
+
             _userAgentParserMock
                 .Setup(p => p.GetBrowser(It.IsAny<string>()))
                 .Returns(expectedBrowser);
@@ -110,7 +112,6 @@ namespace EcSiteBackend.Interactors.UnitTests
             _userRepositoryMock
                 .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
-
 
             _cartRepositoryMock
                 .Setup(r => r.AddAsync(It.IsAny<Cart>(), It.IsAny<CancellationToken>()))
