@@ -57,7 +57,6 @@ namespace EcSiteBackend.Interactors.UnitTests
             );
         }
 
-        // TODO:新しく増えた依存関係をモックする、ユーザーエージェント関連も検証したいかも
         [Fact(DisplayName = "正常系: 入力が有効な場合、ユーザーとカートが作成され、トークンが返る")]
         public async Task SignUp_ShouldCreateUserAndCartAndReturnToken_WhenInputIsValid()
         {
@@ -68,7 +67,9 @@ namespace EcSiteBackend.Interactors.UnitTests
                 Password = "SecurePassword123",
                 FirstName = "太郎",
                 LastName = "テスト",
-                PhoneNumber = "090-9999-9999"
+                PhoneNumber = "090-9999-9999",
+                IpAddress = "127.0.0.1",
+                UserAgent = "TestAgent/1.0"
             };
 
             var expectedUserId = Guid.NewGuid();
@@ -79,7 +80,7 @@ namespace EcSiteBackend.Interactors.UnitTests
             User? capturedUser = null;
             Cart? capturedCart = null;
             LoginHistory? capturedLoginHistory = null;
-            
+
             // UserAgentParserの戻り値
             var expectedBrowser = "TestBrowser";
             var expectedDeviceInfo = "TestDevice";
