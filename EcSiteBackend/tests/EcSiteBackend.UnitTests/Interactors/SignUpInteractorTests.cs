@@ -78,6 +78,16 @@ namespace EcSiteBackend.Interactors.UnitTests
             // キャプチャ用の変数
             User? capturedUser = null;
             Cart? capturedCart = null;
+            LoginHistory? capturedLoginHistory = null;
+            // UserAgentParserの戻り値
+            var expectedBrowser = "TestBrowser";
+            var expectedDeviceInfo = "TestDevice";
+            _userAgentParserMock
+                .Setup(p => p.GetBrowser(It.IsAny<string>()))
+                .Returns(expectedBrowser);
+            _userAgentParserMock
+                .Setup(p => p.GetDeviceInfo(It.IsAny<string>()))
+                .Returns(expectedDeviceInfo);
 
             // Setup
             _userRepositoryMock
@@ -101,10 +111,20 @@ namespace EcSiteBackend.Interactors.UnitTests
                 .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
 
+
             _cartRepositoryMock
                 .Setup(r => r.AddAsync(It.IsAny<Cart>(), It.IsAny<CancellationToken>()))
                 .Callback<Cart, CancellationToken>((cart, _) => capturedCart = cart)
                 .Returns(Task.CompletedTask);
+
+            _loginHistoryRepositoryMock
+                .Setup(r => r.AddAsync(It.IsAny<LoginHistory>(), It.IsAny<CancellationToken>()))
+                .Callback<LoginHistory, CancellationToken>((loginHistory, _) => capturedLoginHistory = loginHistory)
+                .Returns(Task.CompletedTask);
+
+            _loginHistoryRepositoryMock
+                .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(1);
 
             _cartRepositoryMock
                 .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -113,6 +133,57 @@ namespace EcSiteBackend.Interactors.UnitTests
             _jwtServiceMock
                 .Setup(j => j.GenerateToken(It.IsAny<User>()))
                 .Returns(expectedToken);
+
+            // Mapping
+            _mapperMock
+                .Setup(m => m.Map<User>(It.IsAny<SignUpInput>()))
+                .Returns<SignUpInput>(input => new User
+                {
+                    Email = input.Email,
+                    FirstName = input.FirstName,
+                    LastName = input.LastName,
+                    PhoneNumber = input.PhoneNumber,
+                    IsActive = true,
+                    EmailConfirmed = false
+                });
+
+            _mapperMock
+                .Setup(m => m.Map<Cart>(It.IsAny<Cart>()))
+                .Returns<Cart>(cart => new Cart
+                {
+                    UserId = cart.UserId,
+                    LastActivityAt = cart.LastActivityAt
+                });
+
+            _mapperMock
+                .Setup(m => m.Map<LoginHistory>(It.IsAny<LoginHistory>()))
+                .Returns<LoginHistory>(loginHistory => new LoginHistory
+                {
+                    UserId = loginHistory.UserId,
+                    Email = loginHistory.Email,
+                    AttemptedAt = loginHistory.AttemptedAt,
+                    IsSuccess = loginHistory.IsSuccess,
+                    FailureReason = loginHistory.FailureReason,
+                    IpAddress = loginHistory.IpAddress,
+                    UserAgent = loginHistory.UserAgent,
+                    Browser = loginHistory.Browser,
+                    DeviceInfo = loginHistory.DeviceInfo
+                });
+
+            _mapperMock
+                .Setup(m => m.Map<LoginHistory>(It.IsAny<LoginHistory>()))
+                .Returns<LoginHistory>(loginHistory => new LoginHistory
+                {
+                    UserId = loginHistory.UserId,
+                    Email = loginHistory.Email,
+                    AttemptedAt = loginHistory.AttemptedAt,
+                    IsSuccess = loginHistory.IsSuccess,
+                    FailureReason = loginHistory.FailureReason,
+                    IpAddress = loginHistory.IpAddress,
+                    UserAgent = loginHistory.UserAgent,
+                    Browser = loginHistory.Browser,
+                    DeviceInfo = loginHistory.DeviceInfo
+                });
 
             _mapperMock
                 .Setup(m => m.Map<UserDto>(It.IsAny<User>()))
@@ -158,14 +229,28 @@ namespace EcSiteBackend.Interactors.UnitTests
             Assert.Equal(expectedUserId, capturedCart.UserId);
             Assert.True(capturedCart.LastActivityAt > DateTime.UtcNow.AddMinutes(-1));
 
+            // Assert - LoginHistoryの検証
+            Assert.NotNull(capturedLoginHistory);
+            Assert.Equal(expectedUserId, capturedLoginHistory.UserId);
+            Assert.Equal(input.Email, capturedLoginHistory.Email);
+            Assert.True(capturedLoginHistory.IsSuccess);
+            Assert.Equal(input.IpAddress, capturedLoginHistory.IpAddress);
+            Assert.Equal(input.UserAgent, capturedLoginHistory.UserAgent);
+            Assert.Equal(expectedBrowser, capturedLoginHistory.Browser);
+            Assert.Equal(expectedDeviceInfo, capturedLoginHistory.DeviceInfo);
+
             // Assert - メソッド呼び出しの検証
             _userRepositoryMock.Verify(r => r.GetByEmailAsync(input.Email, It.IsAny<CancellationToken>()), Times.Once);
             _userRepositoryMock.Verify(r => r.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
             _userRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _cartRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Cart>(), It.IsAny<CancellationToken>()), Times.Once);
             _cartRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _loginHistoryRepositoryMock.Verify(r => r.AddAsync(It.IsAny<LoginHistory>(), It.IsAny<CancellationToken>()), Times.Once);
+            _loginHistoryRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _jwtServiceMock.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Once);
             _mapperMock.Verify(m => m.Map<UserDto>(It.IsAny<User>()), Times.Once);
+            _userAgentParserMock.Verify(p => p.GetBrowser(It.IsAny<string>()), Times.Once);
+            _userAgentParserMock.Verify(p => p.GetDeviceInfo(It.IsAny<string>()), Times.Once);
         }
         
         [Fact(DisplayName = "異常系: メールアドレスが既に存在する場合、ConflictExceptionがスローされる")]
