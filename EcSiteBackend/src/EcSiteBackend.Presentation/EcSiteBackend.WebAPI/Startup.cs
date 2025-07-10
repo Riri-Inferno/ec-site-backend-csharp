@@ -12,6 +12,7 @@ using EcSiteBackend.Application.UseCases.Interactors;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mappings;
 using EcSiteBackend.Application.Common.Settings;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Interactors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -104,6 +105,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 .AddErrorFilter<ErrorFilter>()
                 .AddSorting()
                 .AddAuthorization()
+                .AddHttpRequestInterceptor<HttpRequestInterceptor>()
                 .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true); // エラー詳細を表示
 
         }
