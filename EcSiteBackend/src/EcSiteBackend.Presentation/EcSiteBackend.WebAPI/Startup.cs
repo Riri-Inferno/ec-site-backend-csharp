@@ -102,7 +102,11 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 .AddType<UserMutations>()
                 .AddProjections()
                 .AddFiltering()
-                .AddErrorFilter<ErrorFilter>()
+                .AddErrorFilter(sp => 
+                {
+                    var logger = sp.GetRequiredService<ILogger<ErrorFilter>>();
+                    return new ErrorFilter(logger);
+                })
                 .AddSorting()
                 .AddAuthorization()
                 .AddHttpRequestInterceptor<HttpRequestInterceptor>()
