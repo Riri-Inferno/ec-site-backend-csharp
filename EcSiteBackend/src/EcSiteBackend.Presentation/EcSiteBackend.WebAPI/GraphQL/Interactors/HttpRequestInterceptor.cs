@@ -1,5 +1,7 @@
 using HotChocolate.AspNetCore;
 using HotChocolate.Execution;
+using EcSiteBackend.Application.Common.Exceptions;
+using EcSiteBackend.Application.Common.Constants;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Interactors
 {
@@ -25,12 +27,6 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Interactors
 
             if (context.User.Identity?.IsAuthenticated == true)
             {
-                foreach (var claim in context.User.Claims)
-                {
-                    _logger.LogInformation($"Claim - Type: {claim.Type}, Value: {claim.Value}");
-                }
-               
-                // ユーザー情報をリクエストビルダーに設定
                 requestBuilder.SetGlobalState("currentUser", context.User);
             }
 

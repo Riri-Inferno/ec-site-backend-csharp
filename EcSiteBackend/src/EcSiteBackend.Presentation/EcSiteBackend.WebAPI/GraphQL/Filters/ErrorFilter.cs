@@ -1,6 +1,7 @@
 using AppException = EcSiteBackend.Application.Common.Exceptions.ApplicationException;
 using AppErrorCodes = EcSiteBackend.Application.Common.Constants.ErrorCodes;
 using AppErrorMessages = EcSiteBackend.Application.Common.Constants.ErrorMessages;
+using EcSiteBackend.Application.Common.Constants;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters
 {
@@ -16,6 +17,14 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters
                     .SetExtension("details", appEx.Details);
             }
 
+            // [Authorize]属性による認証エラー
+            if (error.Code == "AUTH_NOT_AUTHENTICATED" || 
+                error.Exception?.GetType().Name == "AuthorizationException")
+            {
+                return error.WithMessage(ErrorMessages.InvalidToken)
+                            .WithCode(AppErrorCodes.Unauthorized);
+            }
+            
             // その他の例外はログに記録して汎用メッセージを返す
             // TODO: ログ記録
             return error.WithMessage(AppErrorMessages.InternalError)

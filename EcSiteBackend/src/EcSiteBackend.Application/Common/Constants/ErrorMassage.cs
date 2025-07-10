@@ -21,5 +21,11 @@ namespace EcSiteBackend.Application.Common.Constants
 
         // 注文関連
         public const string OrderCannotBeCancelled = "この注文はキャンセルできません。（ステータス: {0}）";
+
+        // 認証関連（Authentication）
+        public const string Unauthorized = "ログインが必要です。";
+        public const string InvalidToken = "認証情報が無効です。再度ログインしてください。";
+        public const string TokenExpired = "認証の有効期限が切れています。再度ログインしてください。";
+        public const string MissingAuthHeader = "認証情報が見つかりません。";
     }
 }
