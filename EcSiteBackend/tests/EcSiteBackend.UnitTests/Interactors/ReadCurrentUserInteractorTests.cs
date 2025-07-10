@@ -1,15 +1,9 @@
 using EcSiteBackend.Application.UseCases.Interactors;
 using EcSiteBackend.Application.Common.Interfaces.Repositories;
-using EcSiteBackend.Application.Common.Interfaces;
 using AutoMapper;
 using Moq;
-using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Domain.Entities;
 using EcSiteBackend.Application.DTOs;
-using EcSiteBackend.Application.Common.Exceptions;
-using EcSiteBackend.Application.Common.Constants;
-using Microsoft.Extensions.Options;
-using EcSiteBackend.Application.Common.Settings;
 using Microsoft.Extensions.Logging;
 
 namespace EcSiteBackend.UnitTests.Interactors
@@ -42,7 +36,88 @@ namespace EcSiteBackend.UnitTests.Interactors
         [Fact(DisplayName = "アクティブなユーザーが正常に取得できること")]
         public async Task ExecuteAsync_ActiveUser_ReturnsUserDto()
         {
+            // Arrange
+            var userId = Guid.NewGuid();
 
+            var expectedUser = new User
+            {
+                Id = userId,
+                PasswordHash = "hashed-password",
+                Email = "john.doe@example.com",
+                IsActive = true,
+                FirstName = "John",
+                LastName = "Doe",
+                PhoneNumber = "123-456-7890",
+                EmailConfirmed = true,
+                LastLoginAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                UserRoles = new List<UserRole>(),
+                UserAddresses = new List<UserAddress>(),
+                PasswordResetTokens = new List<PasswordResetToken>(),
+            };
+
+            var expectedUserDto = new UserDto
+            {
+                Id = expectedUser.Id,
+                Email = expectedUser.Email,
+                FirstName = expectedUser.FirstName,
+                LastName = expectedUser.LastName,
+                FullName = $"{expectedUser.FirstName} {expectedUser.LastName}",
+                DisplayName = $"{expectedUser.FirstName} {expectedUser.LastName}",
+                PhoneNumber = expectedUser.PhoneNumber,
+                IsActive = expectedUser.IsActive,
+                EmailConfirmed = expectedUser.EmailConfirmed,
+                LastLoginAt = expectedUser.LastLoginAt,
+                CreatedAt = expectedUser.CreatedAt,
+                UpdatedAt = expectedUser.UpdatedAt,
+            };
+
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedUser);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<UserDto>(expectedUser))
+                .Returns(expectedUserDto);
+
+            // Act
+            var result = await _interactor.ExecuteAsync(userId, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedUserDto.Id, result.Id);
+            Assert.Equal(expectedUserDto.Email, result.Email);
+            Assert.Equal(expectedUserDto.FirstName, result.FirstName);
+            Assert.Equal(expectedUserDto.LastName, result.LastName);
+            Assert.Equal(expectedUserDto.FullName, result.FullName);
+            Assert.Equal(expectedUserDto.DisplayName, result.DisplayName);
+            Assert.Equal(expectedUserDto.PhoneNumber, result.PhoneNumber);
+            Assert.Equal(expectedUserDto.IsActive, result.IsActive);
+            Assert.Equal(expectedUserDto.EmailConfirmed, result.EmailConfirmed);
+            Assert.Equal(expectedUserDto.LastLoginAt, result.LastLoginAt);
+            Assert.Equal(expectedUserDto.CreatedAt, result.CreatedAt);
+            Assert.Equal(expectedUserDto.UpdatedAt, result.UpdatedAt);
+
+            _userRepositoryMock.Verify(
+                repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()),
+                Times.Once
+            );
+
+            _mapperMock.Verify(
+                mapper => mapper.Map<UserDto>(expectedUser),
+                Times.Once
+            );
+
+            _loggerMock.Verify(
+                x => x.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Successfully retrieved user information")),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                Times.Once
+            );
         }
 
         [Fact(DisplayName = "Guid.Emptyが渡された場合、ArgumentExceptionがスローされること")]
@@ -60,7 +135,7 @@ namespace EcSiteBackend.UnitTests.Interactors
         [Fact(DisplayName = "非アクティブユーザーの場合、UnauthorizedExceptionがスローされること")]
         public async Task ExecuteAsync_InactiveUser_ThrowsUnauthorizedException()
         {
-            
+
         }
     }
 }
