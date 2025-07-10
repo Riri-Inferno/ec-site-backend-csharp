@@ -29,28 +29,18 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Queries
         /// 現在のユーザー情報を取得するQuery
         /// </summary>
         [Authorize]
-        [GraphQLDescription("現在のユーザー情報を取得する")]
         public async Task<CurrentUserInfoPayload> ReadCurrentUser(
-        [Service] IReadCurrentUserUseCase readCurrentUserUseCase,
-        [Service] IHttpContextAccessor httpContextAccessor,
-        CancellationToken cancellationToken = default)
+            [Service] IReadCurrentUserUseCase readCurrentUserUseCase,
+            [GlobalState("currentUserId")] Guid? userId,
+            CancellationToken cancellationToken = default)
         {
-            // HttpContext.User からユーザーIDを取得
-            var userIdClaim = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier);
-
-            // ユーザーIDが存在しない、または無効な場合は例外をスロー
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            if (!userId.HasValue)
             {
                 throw new UnauthorizedException(ErrorMessages.InvalidToken);
             }
 
-            var result = await readCurrentUserUseCase.ExecuteAsync(userId, cancellationToken);
-
-            // ペイロードに詰める
-            return new CurrentUserInfoPayload
-            {
-                User = _mapper.Map<UserType>(result)
-            };
+            var result = await readCurrentUserUseCase.ExecuteAsync(userId.Value, cancellationToken);
+            return new CurrentUserInfoPayload { User = _mapper.Map<UserType>(result) };
         }
     }
 }
