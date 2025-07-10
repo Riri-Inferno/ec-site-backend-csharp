@@ -13,6 +13,7 @@
     <PackageReference Include="HotChocolate.AspNetCore" Version="15.1.7" />
     <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.7" />
     <PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.7" />
+    <PackageReference Include="HotChocolate.Execution" Version="15.1.7" />
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.6" />

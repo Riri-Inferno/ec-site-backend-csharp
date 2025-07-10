@@ -1,5 +1,11 @@
-using HotChocolate;
-using EcSiteBackend.Application.DTOs;
+using EcSiteBackend.Application.UseCases.Interfaces;
+using AutoMapper;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads;
+using HotChocolate.Authorization;
+using System.Security.Claims;
+using EcSiteBackend.Application.Common.Exceptions;
+using EcSiteBackend.Application.Common.Constants;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Queries
 {
@@ -9,13 +15,32 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Queries
     [ExtendObjectType("Query")]
     public class UserQueries
     {
-        /// <summary>
-        /// テスト用：Hello World
-        /// </summary>
-        public string Hello() => "Hello, GraphQL!";
+        private readonly IMapper _mapper;
 
-        // 今後実装予定
-        // public async Task<UserDto> GetUser(Guid id, [Service] IGetUserUseCase getUserUseCase)
-        // public async Task<IEnumerable<UserDto>> GetUsers([Service] IGetUsersUseCase getUsersUseCase)
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public UserQueries(IMapper mapper)
+        {
+            _mapper = mapper;
+        }
+
+        /// <summary>
+        /// 現在のユーザー情報を取得するQuery
+        /// </summary>
+        [Authorize]
+        public async Task<CurrentUserInfoPayload> ReadCurrentUser(
+            [Service] IReadCurrentUserUseCase readCurrentUserUseCase,
+            [GlobalState("currentUserId")] Guid? userId,
+            CancellationToken cancellationToken = default)
+        {
+            if (!userId.HasValue)
+            {
+                throw new UnauthorizedException(ErrorMessages.InvalidToken);
+            }
+
+            var result = await readCurrentUserUseCase.ExecuteAsync(userId.Value, cancellationToken);
+            return new CurrentUserInfoPayload { User = _mapper.Map<UserType>(result) };
+        }
     }
 }

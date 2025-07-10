@@ -39,7 +39,7 @@ namespace EcSiteBackend.Application.Common.Mappings
             //     .ConfigureAuditableEntity(isUpdate: true)
             //     .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
             //     .IgnoreAllNavigationProperties();
-                
+
             // User → UserHistory（履歴保存用）
             CreateMap<User, UserHistory>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

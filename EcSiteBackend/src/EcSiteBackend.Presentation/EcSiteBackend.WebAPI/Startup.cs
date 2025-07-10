@@ -12,6 +12,7 @@ using EcSiteBackend.Application.UseCases.Interactors;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mappings;
 using EcSiteBackend.Application.Common.Settings;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Interactors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -73,6 +74,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             // 4. UseCases
             services.AddScoped<ISignUpUseCase, SignUpInteractor>();
             services.AddScoped<ISignInUseCase, SignInInteractor>();
+            services.AddScoped<IReadCurrentUserUseCase, ReadCurrentUserInteractor>();
 
             // 5. AutoMapper
             services.AddAutoMapper(cfg =>
@@ -100,9 +102,14 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 .AddType<UserMutations>()
                 .AddProjections()
                 .AddFiltering()
-                .AddErrorFilter<ErrorFilter>()
+                .AddErrorFilter(sp => 
+                {
+                    var logger = sp.GetRequiredService<ILogger<ErrorFilter>>();
+                    return new ErrorFilter(logger);
+                })
                 .AddSorting()
                 .AddAuthorization()
+                .AddHttpRequestInterceptor<HttpRequestInterceptor>()
                 .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true); // エラー詳細を表示
 
         }
