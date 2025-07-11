@@ -61,7 +61,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                         ValidIssuer = jwtIssuer,
                         ValidAudience = jwtAudience,
                         IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSecret))
+                            Encoding.UTF8.GetBytes(jwtSecret!))
                     };
                 });
 
