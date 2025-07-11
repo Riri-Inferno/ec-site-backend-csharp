@@ -1,0 +1,27 @@
+services:
+  testdb:
+    image: postgres:16
+    container_name: ecsite-testdb
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass123
+      POSTGRES_DB: ecsite_test
+      # PostgreSQLのパフォーマンスを向上させるための設定
+      POSTGRES_INITDB_ARGS: "-c fsync=off -c synchronous_commit=off -c full_page_writes=off"
+      POSTGRES_HOST_AUTH_METHOD: md5
+    ports:
+      - "8888:5432"
+    # テスト用にメモリ上で動作
+    tmpfs:
+      - /var/lib/postgresql/data
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d ecsite_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
