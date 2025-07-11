@@ -22,6 +22,8 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - JWTSettings__Secret=${JWTSettings__Secret}
       - JWTSettings__ExpirationInMinutes=${JWTSettings__ExpirationInMinutes}
+      - JWTSettings__Issuer=${JWTSettings__Issuer}
+      - JWTSettings__Audience=${JWTSettings__Audience}
       - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
     depends_on:
       - db
