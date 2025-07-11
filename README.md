@@ -62,7 +62,7 @@ JWTSettings__Secret="your-64-character-safe-jwt-secret-key-here-xxxxxxxxxxxxxxxx
 # JWT トークンの有効期限（分単位）
 JWTSettings__ExpirationInMinutes=60
 
-# JWT Issuer (発行者)v
+# JWT Issuer (発行者)
 JWTSettings__Issuer="EcSiteBackend"
 
 # JWT Audience (対象利用者)

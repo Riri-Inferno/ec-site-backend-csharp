@@ -34,9 +34,19 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
 
             // JWT設定を読み込み
-            var jwtSettings = new JwtSettings();
-            _configuration.GetSection("JwtSettings").Bind(jwtSettings);
-            services.Configure<JwtSettings>(_configuration.GetSection("JwtSettings"));
+            var jwtSecret = _configuration["JwtSettings:Secret"];
+            var jwtIssuer = _configuration["JwtSettings:Issuer"];
+            var jwtAudience = _configuration["JwtSettings:Audience"];
+            var jwtExpiration = _configuration["JwtSettings:ExpirationInMinutes"];
+
+            // JWT設定をDIコンテナに登録
+            services.Configure<JwtSettings>(options =>
+            {
+                options.Secret = jwtSecret ?? throw new ArgumentNullException("JWT Secret is not configured.");
+                options.Issuer = jwtIssuer ?? throw new ArgumentNullException("JWT Issuer is not configured.");
+                options.Audience = jwtAudience ?? throw new ArgumentNullException("JWT Audience is not configured.");
+                options.ExpirationInMinutes = int.Parse(jwtExpiration ?? "60");
+            });
 
             // JWT認証の設定
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -48,13 +58,14 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidAudience = jwtSettings.Audience,
+                        ValidIssuer = jwtIssuer,
+                        ValidAudience = jwtAudience,
                         IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSettings.Secret))
+                            Encoding.UTF8.GetBytes(jwtSecret!))
                     };
                 });
 
+            
             // 1. DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString));
