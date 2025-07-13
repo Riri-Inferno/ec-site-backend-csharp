@@ -4,7 +4,7 @@ using EcSiteBackend.Application.Common.Interfaces.Services;
 using EcSiteBackend.Domain.Entities;
 using EcSiteBackend.Domain.Enums;
 
-namespace EcSiteBackend.Application.Services
+namespace EcSiteBackend.Infrastructure.Services
 {
     /// <summary>
     /// 履歴管理サービス

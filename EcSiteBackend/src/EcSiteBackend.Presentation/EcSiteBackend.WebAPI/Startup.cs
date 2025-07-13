@@ -14,6 +14,7 @@ using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mappings;
 using EcSiteBackend.Application.Common.Settings;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Interactors;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares;
+using EcSiteBackend.Application.Common.Interfaces.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -81,6 +82,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddSingleton<IUserAgentParser, UserAgentParser>();
+            services.AddScoped<IHistoryService, HistoryService>();
             services.AddHttpContextAccessor();
 
             // 4. UseCases
