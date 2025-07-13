@@ -35,10 +35,10 @@ namespace EcSiteBackend.Application.Common.Mappings
                 .IgnoreAllNavigationProperties();
 
             // UpdateUserInput → User（更新用）
-            // CreateMap<UpdateUserInput, User>()
-            //     .ConfigureAuditableEntity(isUpdate: true)
-            //     .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-            //     .IgnoreAllNavigationProperties();
+            CreateMap<UpdateUserInput, User>()
+                .ConfigureAuditableEntity(isUpdate: true)
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .IgnoreAllNavigationProperties();
 
             // User → UserHistory（履歴保存用）
             CreateMap<User, UserHistory>()
