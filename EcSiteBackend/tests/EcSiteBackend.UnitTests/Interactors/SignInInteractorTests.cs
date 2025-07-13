@@ -11,7 +11,7 @@ using EcSiteBackend.Application.Common.Constants;
 using Microsoft.Extensions.Options;
 using EcSiteBackend.Application.Common.Settings;
 
-namespace EcSiteBackend.Interactors.UnitTests
+namespace EcSiteBackend.UnitTests.Interactors
 {
     /// <summary>
     /// ユーザー認証（サインイン）ユースケースのテストクラス
