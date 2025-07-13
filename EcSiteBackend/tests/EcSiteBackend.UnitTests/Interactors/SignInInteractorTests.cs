@@ -55,7 +55,6 @@ namespace EcSiteBackend.UnitTests.Interactors
         }
 
         [Fact(DisplayName ="正常系: 入力が有効な場合、ログイン履歴が作成され、トークンが帰る")]
-
         public async Task SignIn_ShouldCreateLoginHistoryAndReturnToken_WhenInputIsValid()
         {
             // Arrange
