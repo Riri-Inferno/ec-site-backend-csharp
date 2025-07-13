@@ -44,5 +44,39 @@ namespace EcSiteBackend.Domain.Entities
         /// 削除者ID
         /// </summary>
         public Guid? DeletedBy { get; set; }
+
+        /// <summary>
+        /// エンティティを新規作成として初期化
+        /// </summary>
+        public virtual void InitializeForCreate(Guid? createdBy = null)
+        {
+            Id = Guid.NewGuid();
+            CreatedAt = DateTime.UtcNow;
+            CreatedBy = createdBy;
+            IsDeleted = false;
+            UpdatedAt = null;
+            UpdatedBy = null;
+            DeletedAt = null;
+            DeletedBy = null;
+        }
+
+        /// <summary>
+        /// エンティティを更新として設定
+        /// </summary>
+        public virtual void MarkAsUpdated(Guid? updatedBy = null)
+        {
+            UpdatedAt = DateTime.UtcNow;
+            UpdatedBy = updatedBy;
+        }
+
+        /// <summary>
+        /// エンティティを削除として設定
+        /// </summary>
+        public virtual void MarkAsDeleted(Guid? deletedBy = null)
+        {
+            IsDeleted = true;
+            DeletedAt = DateTime.UtcNow;
+            DeletedBy = deletedBy;
+        }
     }
 }
