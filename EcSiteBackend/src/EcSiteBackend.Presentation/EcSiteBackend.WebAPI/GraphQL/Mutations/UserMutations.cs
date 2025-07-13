@@ -1,11 +1,12 @@
-using HotChocolate;
-using EcSiteBackend.Application.DTOs;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
 using AutoMapper;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads;
+using EcSiteBackend.Application.Common.Exceptions;
+using EcSiteBackend.Application.Common.Constants;
+using HotChocolate.Authorization;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
 {
@@ -50,11 +51,11 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
             };
 
             var result = await signUpUseCase.ExecuteAsync(signUpInput, cancellationToken);
-            
+
             // ペイロードに詰める
             var payload = _mapper.Map<AuthPayload>(result);
             payload.User = _mapper.Map<UserType>(result.User);
-            
+
             return payload;
         }
 
@@ -79,14 +80,51 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
                 IpAddress = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
                 UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
             };
-            
+
             var result = await signInUseCase.ExecuteAsync(signInInput, cancellationToken);
-            
+
             // ペイロードに詰める
             var payload = _mapper.Map<AuthPayload>(result);
             payload.User = _mapper.Map<UserType>(result.User);
-            
+
             return payload;
+        }
+
+        /// <summary>
+        /// ユーザー情報を更新するMutation
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="updateUserUseCase"></param>
+        /// <param name="httpContextAccessor"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>更新後のユーザー情報</returns>
+        [Authorize]
+        public async Task<CurrentUserInfoPayload> UpdateUser(
+            UpdateUserInputType input,
+            [Service] IUpdateUserUseCase updateUserUseCase,
+            [Service] IHttpContextAccessor httpContextAccessor,
+            [GlobalState("currentUserId")] Guid? userId,
+            CancellationToken cancellationToken)
+        {
+            if (!userId.HasValue)
+            {
+                throw new UnauthorizedException(ErrorMessages.InvalidToken);
+            }
+
+            var updateInput = new UpdateUserInput
+            {
+                Id = userId.Value,
+                FirstName = input.FirstName,
+                LastName = input.LastName,
+                PhoneNumber = input.PhoneNumber,
+                IpAddress = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
+                UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
+            };
+
+            var result = await updateUserUseCase.ExecuteAsync(updateInput, cancellationToken);
+
+            // ペイロードに詰めて返す
+            return new CurrentUserInfoPayload { User = _mapper.Map<UserType>(result) };
         }
     }
 }

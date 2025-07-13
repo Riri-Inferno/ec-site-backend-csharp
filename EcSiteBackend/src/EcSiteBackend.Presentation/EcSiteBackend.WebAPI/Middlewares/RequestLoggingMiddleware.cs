@@ -52,7 +52,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
                 // オペレーション情報を抽出
                 var (operationType, operationName) = ExtractOperationInfo(requestBody);
 
-                // ターゲットアセンブリを取得（ここに移動）
+                // ターゲットアセンブリを取得
                 var targetAssembly = GetTargetAssembly(context);
 
                 // リクエストのマスク

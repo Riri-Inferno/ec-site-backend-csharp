@@ -27,7 +27,7 @@ namespace EcSiteBackend.Application.Common.Mappings
 
             // SignUpInput → User（新規作成用）
             CreateMap<SignUpInput, User>()
-                .ConfigureAuditableEntity() // 監査エンティティを自動設定
+                .IgnoreBaseEntityProperties()
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
                 .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(_ => false))
@@ -35,10 +35,9 @@ namespace EcSiteBackend.Application.Common.Mappings
                 .IgnoreAllNavigationProperties();
 
             // UpdateUserInput → User（更新用）
-            // CreateMap<UpdateUserInput, User>()
-            //     .ConfigureAuditableEntity(isUpdate: true)
-            //     .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-            //     .IgnoreAllNavigationProperties();
+            CreateMap<UpdateUserInput, User>()
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .IgnoreAllNavigationProperties();
 
             // User → UserHistory（履歴保存用）
             CreateMap<User, UserHistory>()
