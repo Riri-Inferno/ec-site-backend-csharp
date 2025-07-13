@@ -4,6 +4,9 @@ using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
 using AutoMapper;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads;
+using EcSiteBackend.Application.Common.Exceptions;
+using EcSiteBackend.Application.Common.Constants;
+using HotChocolate.Authorization;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
 {
@@ -95,15 +98,22 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
         /// <param name="httpContextAccessor"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
+        [Authorize]
         public async Task UpdateUser(
             UpdateUserInputType input,
             [Service] IUpdateUserUseCase updateUserUseCase,
             [Service] IHttpContextAccessor httpContextAccessor,
+            [GlobalState("currentUserId")] Guid? userId,
             CancellationToken cancellationToken)
         {
+            if (!userId.HasValue)
+            {
+                throw new UnauthorizedException(ErrorMessages.InvalidToken);
+            }
+
             var updateInput = new UpdateUserInput
             {
-                Id = input.Id,
+                Id = userId.Value,
                 FirstName = input.FirstName,
                 LastName = input.LastName,
                 PhoneNumber = input.PhoneNumber,

@@ -9,12 +9,6 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs
     public class UpdateUserInputType
     {
         /// <summary>
-        /// ユーザーID（必須）
-        /// </summary>
-        [Required(ErrorMessage = "ユーザーIDは必須です")]
-        public Guid Id { get; set; }
-
-        /// <summary>
         /// メールアドレス（オプション・形式チェックあり）
         /// </summary>
         [EmailAddress(ErrorMessage = "有効なメールアドレスを入力してください")]
