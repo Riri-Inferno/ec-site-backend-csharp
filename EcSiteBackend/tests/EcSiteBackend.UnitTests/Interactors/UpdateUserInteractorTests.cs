@@ -43,7 +43,7 @@ namespace EcSiteBackend.UnitTests.Interactors
                 _mapperMock.Object);
         }
 
-        [Fact(DisplayName = "ユーザー情報（FirstName）のみ更新できること")]
+        [Fact(DisplayName = "正常系:ユーザー情報（FirstName）のみ更新できること")]
         public async Task UpdateUser_FirstNameOnly_ShouldUpdateSuccessfully()
         {
             // Arrange
@@ -131,7 +131,49 @@ namespace EcSiteBackend.UnitTests.Interactors
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
 
-        [Fact(DisplayName = "存在しないユーザーIDの場合、NotFoundExceptionがスローされること")]
+        [Fact(DisplayName = "正常系:ユーザー情報（LastName）のみ更新できること")]
+        public async Task UpdateUser_LastNameOnly_ShouldUpdateSuccessfully()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "正常系:ユーザー情報（PhoneNumber）のみ更新できること")]
+        public async Task UpdateUser_PhoneNumberOnly_ShouldUpdateSuccessfully()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "正常系:複数フィールドを同時に更新できること")]
+        public async Task UpdateUser_MultipleFields_ShouldUpdateSuccessfully()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "正常系:空文字列/nullの場合は既存値が保持されること")]
+        public async Task UpdateUser_EmptyOrNullInput_ShouldKeepExistingValues()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "正常系:更新履歴が正しく作成されること")]
+        public async Task UpdateUser_ShouldCreateHistory()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "正常系:監査情報（UpdatedAt/UpdatedBy）が設定されること")]
+        public async Task UpdateUser_ShouldSetAuditFields()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "正常系:トランザクション内で処理が実行されること")]
+        public async Task UpdateUser_ShouldExecuteWithinTransaction()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "異常系:存在しないユーザーIDの場合、NotFoundExceptionがスローされること")]
         public async Task UpdateUser_UserNotFound_ShouldThrowNotFoundException()
         {
             // Arrange
@@ -164,6 +206,24 @@ namespace EcSiteBackend.UnitTests.Interactors
             // 更新系のメソッドは呼ばれないことを確認
             _userRepositoryMock.Verify(repo => repo.Update(It.IsAny<User>()), Times.Never);
             _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "異常系:ユーザーIDがGuid.Emptyの場合、NotFoundExceptionがスローされること")]
+        public async Task UpdateUser_EmptyGuid_ShouldThrowNotFoundException()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "異常系:リポジトリでエラーが発生した場合、トランザクションがロールバックされること")]
+        public async Task UpdateUser_RepositoryError_ShouldRollbackTransaction()
+        {
+            // TODO: 実装
+        }
+
+        [Fact(DisplayName = "異常系:履歴サービスでエラーが発生した場合、トランザクションがロールバックされること")]
+        public async Task UpdateUser_HistoryServiceError_ShouldRollbackTransaction()
+        {
+            // TODO: 実装
         }
     }
 }
