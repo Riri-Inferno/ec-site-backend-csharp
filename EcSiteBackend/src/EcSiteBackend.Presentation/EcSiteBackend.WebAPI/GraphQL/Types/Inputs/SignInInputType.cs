@@ -13,6 +13,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs
         /// </summary>
         [Required(ErrorMessage = "メールアドレスは必須です")]
         [EmailAddress(ErrorMessage = "有効なメールアドレスを入力してください")]
+        [Sensitive("メールアドレスは個人情報です")] 
         public string Email { get; set; } = string.Empty;
 
         /// <summary>

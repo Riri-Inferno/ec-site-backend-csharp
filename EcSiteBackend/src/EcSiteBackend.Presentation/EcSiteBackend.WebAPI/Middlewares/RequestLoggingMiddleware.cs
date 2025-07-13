@@ -1,11 +1,16 @@
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Utils;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
 {
     /// <summary>
-    /// GraphQLリクエストのログを記録するミドルウェア
+    /// HTTPリクエストをログに記録するミドルウェア
     /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     public class RequestLoggingMiddleware
     {
         private readonly RequestDelegate _next;
@@ -14,47 +19,52 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="next"></param>
-        /// <param name="logger"></param>
         public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
         {
             _next = next;
             _logger = logger;
         }
 
+        /// <summary>
+        /// HTTPリクエストをログに記録するミドルウェア
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
         {
             var traceId = Activity.Current?.TraceId.ToString() ?? context.TraceIdentifier;
 
-            // GraphQL endpoint以外はスキップしてもOK（必要なら）
             if (context.Request.Path.StartsWithSegments("/graphql", StringComparison.OrdinalIgnoreCase))
             {
-                context.Request.EnableBuffering(); // 読み取り可能にする
+                context.Request.EnableBuffering();
 
-                var requestBody = string.Empty;
+                string requestBody;
                 using (var reader = new StreamReader(
-                           context.Request.Body,
-                           encoding: Encoding.UTF8,
-                           detectEncodingFromByteOrderMarks: false,
-                           leaveOpen: true))
+                        context.Request.Body,
+                        encoding: Encoding.UTF8,
+                        detectEncodingFromByteOrderMarks: false,
+                        leaveOpen: true))
                 {
                     requestBody = await reader.ReadToEndAsync();
-                    context.Request.Body.Position = 0; // 巻き戻し
+                    context.Request.Body.Position = 0;
                 }
 
-                // レスポンスをキャプチャする準備
+                // GraphQLクエリをマスク
+                string maskedRequestBody = MaskSensitiveGraphQLRequest(requestBody);
+
+                // レスポンスキャプチャ
                 var originalBody = context.Response.Body;
                 using var memStream = new MemoryStream();
                 context.Response.Body = memStream;
 
                 var start = DateTime.UtcNow;
 
-                await _next(context); // 本来の処理を呼ぶ
+                await _next(context);
 
                 memStream.Position = 0;
                 var responseBody = await new StreamReader(memStream).ReadToEndAsync();
                 memStream.Position = 0;
-                await memStream.CopyToAsync(originalBody); // 元に戻す
+                await memStream.CopyToAsync(originalBody);
 
                 var duration = DateTime.UtcNow - start;
 
@@ -63,13 +73,58 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
                     traceId,
                     context.Request.Path,
                     duration.TotalMilliseconds,
-                    Truncate(requestBody, 1000),
-                    Truncate(responseBody, 1000)
+                    Truncate(maskedRequestBody, 2000),
+                    Truncate(responseBody, 2000)
                 );
             }
             else
             {
-                await _next(context); // GraphQL以外のリクエストはそのまま処理
+                await _next(context);
+            }
+        }
+
+        /// <summary>
+        /// GraphQLリクエストボディから機密情報をマスクする
+        /// </summary>
+        /// <param name="requestBody"></param>
+        /// <returns></returns>
+        private string MaskSensitiveGraphQLRequest(string requestBody)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(requestBody);
+                var root = doc.RootElement;
+
+                if (!root.TryGetProperty("query", out var queryElement))
+                    return requestBody;
+
+                var query = queryElement.GetString();
+                if (string.IsNullOrEmpty(query))
+                    return requestBody;
+
+                // GraphQL入力型が定義されているアセンブリを取得
+                var targetAssembly = typeof(SignInInputType).Assembly;
+                
+                // すべてのInputType内のSensitiveフィールドを自動的にマスク
+                var maskedQuery = MaskingUtil.MaskGraphQLQuery(query, targetAssembly);
+
+                var result = new Dictionary<string, object?>
+                {
+                    ["query"] = maskedQuery
+                };
+
+                if (root.TryGetProperty("operationName", out var opName))
+                    result["operationName"] = opName.GetString();
+
+                if (root.TryGetProperty("variables", out var vars))
+                    result["variables"] = vars.GetRawText();
+
+                return JsonSerializer.Serialize(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to mask GraphQL request");
+                return requestBody;
             }
         }
 
