@@ -1,3 +1,5 @@
+using EcSiteBackend.Application.Common.Attributes;
+
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads
 {
     /// <summary>
@@ -13,6 +15,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Payloads
         /// <summary>
         /// JWTトークン
         /// </summary>
+        [Sensitive("トークンは機密情報です")]
         public string? Token { get; set; }
 
         /// <summary>
