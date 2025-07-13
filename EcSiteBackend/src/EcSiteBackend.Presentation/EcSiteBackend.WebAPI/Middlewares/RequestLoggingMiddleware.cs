@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
+using System.Reflection;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Utils;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
@@ -52,8 +52,11 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
                 // オペレーション情報を抽出
                 var (operationType, operationName) = ExtractOperationInfo(requestBody);
 
+                // ターゲットアセンブリを取得（ここに移動）
+                var targetAssembly = GetTargetAssembly(context);
+
                 // リクエストのマスク
-                string maskedRequestBody = MaskSensitiveGraphQLRequest(requestBody);
+                string maskedRequestBody = MaskSensitiveGraphQLRequest(requestBody, targetAssembly);
 
                 // レスポンスキャプチャ
                 var originalBody = context.Response.Body;
@@ -71,8 +74,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
 
                 var duration = DateTime.UtcNow - start;
 
-                // レスポンスのマスク（同じアセンブリを使用）
-                var targetAssembly = typeof(SignInInputType).Assembly;
+                // レスポンスのマスク
                 var maskedResponseBody = MaskingUtil.MaskGraphQLResponse(responseBody, targetAssembly);
 
                 _logger.LogInformation(
@@ -93,11 +95,36 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
         }
 
         /// <summary>
+        /// GraphQLスキーマからターゲットアセンブリを取得する
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private Assembly GetTargetAssembly(HttpContext context)
+        {
+            try
+            {
+                // GraphQLスキーマからアセンブリを取得
+                var schema = context.RequestServices.GetService<ISchema>();
+                if (schema != null)
+                {
+                    return schema.GetType().Assembly;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to get assembly from ISchema");
+            }
+
+            // フォールバック: 現在のアセンブリを使用
+            return this.GetType().Assembly;
+        }
+
+        /// <summary>
         /// GraphQLリクエストボディから機密情報をマスクする
         /// </summary>
         /// <param name="requestBody"></param>
         /// <returns></returns>
-        private string MaskSensitiveGraphQLRequest(string requestBody)
+        private string MaskSensitiveGraphQLRequest(string requestBody, Assembly targetAssembly)
         {
             try
             {
@@ -110,10 +137,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
                 var query = queryElement.GetString();
                 if (string.IsNullOrEmpty(query))
                     return requestBody;
-
-                // GraphQL入力型が定義されているアセンブリを取得
-                var targetAssembly = typeof(SignInInputType).Assembly;
-
+                    
                 // すべてのInputType内のSensitiveフィールドを自動的にマスク
                 var maskedQuery = MaskingUtil.MaskGraphQLQuery(query, targetAssembly);
 
