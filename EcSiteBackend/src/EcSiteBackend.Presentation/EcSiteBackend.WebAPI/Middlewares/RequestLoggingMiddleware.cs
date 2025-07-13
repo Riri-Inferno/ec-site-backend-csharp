@@ -49,6 +49,9 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
                     context.Request.Body.Position = 0;
                 }
 
+                // オペレーション情報を抽出
+                var (operationType, operationName) = ExtractOperationInfo(requestBody);
+
                 // リクエストのマスク
                 string maskedRequestBody = MaskSensitiveGraphQLRequest(requestBody);
 
@@ -73,9 +76,11 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
                 var maskedResponseBody = MaskingUtil.MaskGraphQLResponse(responseBody, targetAssembly);
 
                 _logger.LogInformation(
-                    "[GraphQL] TraceId={TraceId} Path={Path} Duration={Duration}ms\nRequest={RequestBody}\nResponse={ResponseBody}",
+                    "[GraphQL] TraceId={TraceId} Path={Path} Operation={OperationType}/{OperationName} Duration={Duration}ms\nRequest={RequestBody}\nResponse={ResponseBody}",
                     traceId,
                     context.Request.Path,
+                    operationType,
+                    operationName ?? "anonymous",
                     duration.TotalMilliseconds,
                     Truncate(maskedRequestBody, 2000),
                     Truncate(maskedResponseBody, 2000)
@@ -108,7 +113,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
 
                 // GraphQL入力型が定義されているアセンブリを取得
                 var targetAssembly = typeof(SignInInputType).Assembly;
-                
+
                 // すべてのInputType内のSensitiveフィールドを自動的にマスク
                 var maskedQuery = MaskingUtil.MaskGraphQLQuery(query, targetAssembly);
 
@@ -143,6 +148,63 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
         {
             if (string.IsNullOrEmpty(input)) return string.Empty;
             return input.Length <= maxLength ? input : input.Substring(0, maxLength) + "...(truncated)";
+        }
+        
+        /// <summary>
+        /// GraphQLリクエストボディからオペレーションタイプとオペレーション名を抽出する
+        /// </summary>
+        /// <param name="requestBody"></param>
+        /// <returns></returns>
+        private (string operationType, string? operationName) ExtractOperationInfo(string requestBody)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(requestBody);
+                var root = doc.RootElement;
+
+                if (!root.TryGetProperty("query", out var queryElement))
+                    return ("unknown", null);
+
+                var query = queryElement.GetString();
+                if (string.IsNullOrEmpty(query))
+                    return ("unknown", null);
+
+                // オペレーションタイプとオペレーション名を抽出
+                var match = System.Text.RegularExpressions.Regex.Match(
+                    query,
+                    @"^\s*(query|mutation|subscription)(?:\s+(\w+))?\s*[({]",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase |
+                    System.Text.RegularExpressions.RegexOptions.Multiline
+                );
+
+                if (match.Success)
+                {
+                    var operationType = match.Groups[1].Value.ToLower();
+                    var operationName = match.Groups[2].Success ? match.Groups[2].Value : null;
+
+                    // オペレーション名がない場合、最初のフィールドを取得
+                    if (string.IsNullOrEmpty(operationName))
+                    {
+                        var fieldMatch = System.Text.RegularExpressions.Regex.Match(
+                            query,
+                            @"{\s*(\w+)",
+                            System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                        );
+                        if (fieldMatch.Success)
+                        {
+                            operationName = fieldMatch.Groups[1].Value;
+                        }
+                    }
+
+                    return (operationType, operationName);
+                }
+
+                return ("query", null); // デフォルト
+            }
+            catch
+            {
+                return ("unknown", null);
+            }
         }
     }
 }
