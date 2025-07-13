@@ -1,4 +1,3 @@
-````markdown
 ---
 name: New Resolver
 about: GraphQL Query/Mutationの追加
@@ -32,7 +31,6 @@ mutation {
   xxxMutation(input: XxxInput!): XxxPayload!
 }
 ```
-````
 
 ### 入力型
 
