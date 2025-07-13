@@ -51,7 +51,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             _jwtSettings = jwtSettings.Value;
             _mapper = mapper;
         }
-        
+
         /// <summary>
         /// サインアップする
         /// </summary>
@@ -68,6 +68,8 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 // ユーザー作成
                 var user = _mapper.Map<User>(input);
                 user.PasswordHash = _passwordService.HashPassword(input.Password);
+                user.InitializeForCreate(); // 監査情報を設定
+
                 await _userRepository.AddAsync(user, cancellationToken);
                 await _userRepository.SaveChangesAsync(cancellationToken);
 
@@ -77,12 +79,13 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     UserId = user.Id,
                     LastActivityAt = DateTime.UtcNow,
                 };
-                cart = _mapper.Map<Cart>(cart); // 監査フィールドを自動設定
+                cart.InitializeForCreate(user.Id); // 監査情報を設定
+
                 await _cartRepository.AddAsync(cart, cancellationToken);
                 await _cartRepository.SaveChangesAsync(cancellationToken);
 
                 // 初回ログイン履歴の記録
-                var loginHistoryInput = new LoginHistory
+                var loginHistory = new LoginHistory
                 {
                     UserId = user.Id,
                     Email = user.Email,
@@ -94,9 +97,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     Browser = _userAgentParser.GetBrowser(input.UserAgent),
                     DeviceInfo = _userAgentParser.GetDeviceInfo(input.UserAgent)
                 };
-
-                // 監査フィールドを自動設定
-                var loginHistory = _mapper.Map<LoginHistory>(loginHistoryInput);
+                loginHistory.InitializeForCreate(user.Id); // 監査情報を設定
 
                 await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
                 await _loginHistoryRepository.SaveChangesAsync(cancellationToken);

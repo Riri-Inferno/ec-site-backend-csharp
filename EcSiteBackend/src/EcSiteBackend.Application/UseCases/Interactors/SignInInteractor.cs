@@ -59,7 +59,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                 var user = await _userRepository.GetByEmailAsync(input.Email, cancellationToken);
 
                 // ログイン履歴の記録（失敗も記録）
-                var loginHistoryInput = new LoginHistory
+                var loginHistory = new LoginHistory
                 {
                     UserId = user?.Id,
                     Email = input.Email,
@@ -72,16 +72,16 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     DeviceInfo = _userAgentParser.GetDeviceInfo(input.UserAgent)
                 };
 
-                // AutoMapperで監査フィールドを自動設定
-                var loginHistory = _mapper.Map<LoginHistory>(loginHistoryInput);
-                
+                // 監査情報を設定
+                loginHistory.InitializeForCreate(user?.Id);
+
                 // ユーザーが存在しない、または無効な場合
                 if (user is null || !user.IsActive)
                 {
                     loginHistory.FailureReason = "User not found or inactive";
                     await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
                     await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
-                    
+
                     throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
                 }
 
@@ -91,7 +91,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     loginHistory.FailureReason = "Invalid password";
                     await _loginHistoryRepository.AddAsync(loginHistory, cancellationToken);
                     await _loginHistoryRepository.SaveChangesAsync(cancellationToken);
-                    
+
                     throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
                 }
 
@@ -101,6 +101,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
 
                 // 最終ログイン日時更新
                 user.LastLoginAt = DateTime.UtcNow;
+                user.MarkAsUpdated(user.Id); // 監査情報を設定
                 _userRepository.Update(user);
 
                 // ログイン履歴の保存
@@ -116,7 +117,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     User = _mapper.Map<UserDto>(user),
                     Token = token,
                     ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes)
-                };             
+                };
             }, cancellationToken);
         }
     }

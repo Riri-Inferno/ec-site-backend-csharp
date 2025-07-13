@@ -7,7 +7,9 @@ using EcSiteBackend.Domain.Entities;
 using EcSiteBackend.Application.Common.Interfaces.Services;
 using EcSiteBackend.Application.Common.Interfaces;
 using EcSiteBackend.Domain.Enums;
-
+using EcSiteBackend.Application.DTOs;
+using EcSiteBackend.Application.Common.Constants;
+using EcSiteBackend.Application.Common.Extensions;
 
 namespace EcSiteBackend.Application.UseCases.Interactors
 {
@@ -39,24 +41,36 @@ namespace EcSiteBackend.Application.UseCases.Interactors
         /// <summary>
         /// ユーザー情報を更新する
         /// </summary>
-        public async Task ExecuteAsync(UpdateUserInput input, CancellationToken cancellationToken)
+        public async Task<UserDto> ExecuteAsync(UpdateUserInput input, CancellationToken cancellationToken)
         {
+            var user = new User();
+
             await _transactionService.ExecuteAsync(async () =>
             {
                 // 更新対象を取得
-                var user = await _userRepository.GetByIdAsync(input.Id, cancellationToken);
+                user = await _userRepository.GetByIdAsync(input.Id, cancellationToken);
                 if (user is null)
                 {
-                    throw new NotFoundException("ユーザーが見つかりません");
+                    throw new NotFoundException(ErrorCodes.NotFound, $"User (ID: {input.Id}) が見つかりません。");
                 }
 
-                // 履歴保存用
-                var originalUser = _mapper.Map<User>(user);
+                // 履歴保存用のクローンを作成
+                var originalUser = user.CloneForHistory();
 
-                // 入力データをマッピングして更新
-                _mapper.Map(input, user);
+                // 入力データで更新
+                if (!string.IsNullOrEmpty(input.Email))
+                    user.Email = input.Email;
+                if (!string.IsNullOrEmpty(input.FirstName))
+                    user.FirstName = input.FirstName;
+                if (!string.IsNullOrEmpty(input.LastName))
+                    user.LastName = input.LastName;
+                if (!string.IsNullOrEmpty(input.PhoneNumber))
+                    user.PhoneNumber = input.PhoneNumber;
+
+                // 監査情報を設定
+                user.MarkAsUpdated(input.Id); // または適切なユーザーID
+
                 _userRepository.Update(user);
-
                 await _userRepository.SaveChangesAsync(cancellationToken);
 
                 // 履歴を作成
@@ -65,8 +79,10 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     OperationType.Update,
                     input.Id,
                     cancellationToken);
-
             }, cancellationToken);
+
+            // 更新後のユーザー情報を返す
+            return _mapper.Map<UserDto>(user);
         }
     }
 }
