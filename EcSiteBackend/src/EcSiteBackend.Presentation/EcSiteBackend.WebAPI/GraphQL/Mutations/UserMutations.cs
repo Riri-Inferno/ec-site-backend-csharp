@@ -1,5 +1,3 @@
-using HotChocolate;
-using EcSiteBackend.Application.DTOs;
 using EcSiteBackend.Application.UseCases.Interfaces;
 using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs;
@@ -50,11 +48,11 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
             };
 
             var result = await signUpUseCase.ExecuteAsync(signUpInput, cancellationToken);
-            
+
             // ペイロードに詰める
             var payload = _mapper.Map<AuthPayload>(result);
             payload.User = _mapper.Map<UserType>(result.User);
-            
+
             return payload;
         }
 
@@ -79,14 +77,41 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
                 IpAddress = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
                 UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
             };
-            
+
             var result = await signInUseCase.ExecuteAsync(signInInput, cancellationToken);
-            
+
             // ペイロードに詰める
             var payload = _mapper.Map<AuthPayload>(result);
             payload.User = _mapper.Map<UserType>(result.User);
-            
+
             return payload;
+        }
+        
+        /// <summary>
+        /// ユーザー情報を更新するMutation
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="updateUserUseCase"></param>
+        /// <param name="httpContextAccessor"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task UpdateUser(
+            UpdateUserInputType input,
+            [Service] IUpdateUserUseCase updateUserUseCase,
+            [Service] IHttpContextAccessor httpContextAccessor,
+            CancellationToken cancellationToken)
+        {
+            var updateInput = new UpdateUserInput
+            {
+                Id = input.Id,
+                FirstName = input.FirstName,
+                LastName = input.LastName,
+                PhoneNumber = input.PhoneNumber,
+                IpAddress = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
+                UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
+            };
+
+            await updateUserUseCase.ExecuteAsync(updateInput, cancellationToken);
         }
     }
 }
