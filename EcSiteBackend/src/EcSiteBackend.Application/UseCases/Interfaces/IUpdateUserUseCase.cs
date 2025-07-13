@@ -1,3 +1,4 @@
+using EcSiteBackend.Application.DTOs;
 using EcSiteBackend.Application.UseCases.InputOutputModels;
 
 namespace EcSiteBackend.Application.UseCases.Interfaces
@@ -12,6 +13,6 @@ namespace EcSiteBackend.Application.UseCases.Interfaces
         /// </summary>
         /// <param name="input">更新するユーザー情報</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
-        Task ExecuteAsync(UpdateUserInput input, CancellationToken cancellationToken);
+        Task<UserDto> ExecuteAsync(UpdateUserInput input, CancellationToken cancellationToken);
     }
 }

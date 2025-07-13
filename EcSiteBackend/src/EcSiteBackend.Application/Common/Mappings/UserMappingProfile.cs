@@ -48,10 +48,6 @@ namespace EcSiteBackend.Application.Common.Mappings
                 .ForMember(dest => dest.OperationType, opt => opt.Ignore()) // 呼び出し時に設定
                 .ForMember(dest => dest.OperatedBy, opt => opt.Ignore()) // 呼び出し時に設定
                 .ForMember(dest => dest.OriginalUser, opt => opt.Ignore());
-
-            // User → User(履歴用コピー)
-            CreateMap<User, User>()
-                .IgnoreAllNavigationProperties();
         }
     }
 }

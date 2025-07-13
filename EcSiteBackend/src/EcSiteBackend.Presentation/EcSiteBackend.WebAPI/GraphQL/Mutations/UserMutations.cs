@@ -89,7 +89,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
 
             return payload;
         }
-        
+
         /// <summary>
         /// ユーザー情報を更新するMutation
         /// </summary>
@@ -97,9 +97,9 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
         /// <param name="updateUserUseCase"></param>
         /// <param name="httpContextAccessor"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <returns>更新後のユーザー情報</returns>
         [Authorize]
-        public async Task UpdateUser(
+        public async Task<CurrentUserInfoPayload> UpdateUser(
             UpdateUserInputType input,
             [Service] IUpdateUserUseCase updateUserUseCase,
             [Service] IHttpContextAccessor httpContextAccessor,
@@ -121,7 +121,10 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
                 UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
             };
 
-            await updateUserUseCase.ExecuteAsync(updateInput, cancellationToken);
+            var result = await updateUserUseCase.ExecuteAsync(updateInput, cancellationToken);
+
+            // ペイロードに詰めて返す
+            return new CurrentUserInfoPayload { User = _mapper.Map<UserType>(result) };
         }
     }
 }
