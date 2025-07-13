@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using EcSiteBackend.Application.Common.Attributes;
 
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs
 {
@@ -19,6 +20,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types.Inputs
         /// </summary>
         [Required(ErrorMessage = "パスワードは必須です")]
         [MinLength(8, ErrorMessage = "パスワードは8文字以上である必要があります")]
+        [Sensitive("パスワードは機密情報です")]
         public string Password { get; set; } = string.Empty;
     }
 }
