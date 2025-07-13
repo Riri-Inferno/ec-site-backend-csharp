@@ -13,6 +13,7 @@ using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Filters;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mappings;
 using EcSiteBackend.Application.Common.Settings;
 using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Interactors;
+using EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -65,7 +66,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                     };
                 });
 
-            
+
             // 1. DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString));
@@ -113,7 +114,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 .AddType<UserMutations>()
                 .AddProjections()
                 .AddFiltering()
-                .AddErrorFilter(sp => 
+                .AddErrorFilter(sp =>
                 {
                     var logger = sp.GetRequiredService<ILogger<ErrorFilter>>();
                     return new ErrorFilter(logger);
@@ -122,7 +123,6 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
                 .AddAuthorization()
                 .AddHttpRequestInterceptor<HttpRequestInterceptor>()
                 .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true); // エラー詳細を表示
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -137,6 +137,9 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             // 認証ミドルウェア
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // GraphQLログ記録ミドルウェア
+            app.UseMiddleware<RequestLoggingMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
