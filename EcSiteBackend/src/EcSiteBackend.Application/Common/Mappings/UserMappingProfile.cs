@@ -27,6 +27,7 @@ namespace EcSiteBackend.Application.Common.Mappings
 
             // SignUpInput → User（新規作成用）
             CreateMap<SignUpInput, User>()
+                .IgnoreBaseEntityProperties()
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
                 .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(_ => false))
