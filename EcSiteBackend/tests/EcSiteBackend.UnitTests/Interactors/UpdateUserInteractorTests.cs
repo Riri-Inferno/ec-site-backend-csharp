@@ -211,7 +211,25 @@ namespace EcSiteBackend.UnitTests.Interactors
         [Fact(DisplayName = "異常系:ユーザーIDがGuid.Emptyの場合、NotFoundExceptionがスローされること")]
         public async Task UpdateUser_EmptyGuid_ShouldThrowNotFoundException()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.Empty;
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+                FirstName = "UpdateFirstName"
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<NotFoundException>(
+                () => _interactor.ExecuteAsync(input, CancellationToken.None));
+
+            Assert.Contains($"User (ID: {userId}) が見つかりません。", exception.Message);
+
+            // リポジトリが呼ばれたことを確認
+            _userRepositoryMock.Verify(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            // 更新系のメソッドは呼ばれないことを確認
+            _userRepositoryMock.Verify(repo => repo.Update(It.IsAny<User>()), Times.Never);
+            _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact(DisplayName = "異常系:リポジトリでエラーが発生した場合、トランザクションがロールバックされること")]
