@@ -87,6 +87,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<ISignUpUseCase, SignUpInteractor>();
             services.AddScoped<ISignInUseCase, SignInInteractor>();
             services.AddScoped<IReadCurrentUserUseCase, ReadCurrentUserInteractor>();
+            services.AddScoped<IUpdateUserUseCase, UpdateUserInteractor>();
 
             // 5. AutoMapper
             services.AddAutoMapper(cfg =>
