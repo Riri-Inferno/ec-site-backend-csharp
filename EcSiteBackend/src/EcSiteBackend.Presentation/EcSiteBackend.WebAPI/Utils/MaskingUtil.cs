@@ -28,6 +28,11 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Utils
             return result;
         }
 
+        /// <summary>
+        /// オブジェクトをJSON形式でシリアライズし、機密情報をマスクする
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static string ToMaskedJson(object input)
         {
             var masked = MaskSensitiveProperties(input);
@@ -82,6 +87,68 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Utils
             }
 
             return maskedQuery;
+        }
+
+
+        /// <summary>
+        /// GraphQLレスポンス内のセンシティブなフィールドをマスクする
+        /// </summary>
+        public static string MaskGraphQLResponse(string responseBody, Assembly targetAssembly)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(responseBody);
+                var root = doc.RootElement;
+
+                // レスポンス型（PayloadやTypeで終わる型）を取得
+                var responseTypes = targetAssembly.GetTypes()
+                    .Where(t => t.IsClass && !t.IsAbstract && 
+                        (t.Name.EndsWith("Payload") || t.Name.EndsWith("Type")))
+                    .ToList();
+
+                var maskedResponse = responseBody;
+
+                foreach (var type in responseTypes)
+                {
+                    foreach (var prop in type.GetProperties())
+                    {
+                        if (prop.GetCustomAttribute<SensitiveAttribute>() != null)
+                        {
+                            var fieldName = char.ToLower(prop.Name[0]) + prop.Name.Substring(1);
+                            
+                            // JSONレスポンス内の値をマスク
+                            var patterns = new[]
+                            {
+                                $@"""{fieldName}""\s*:\s*""[^""]*""",  // "token": "value"
+                                $@"""{fieldName}""\s*:\s*'[^']*'",      // "token": 'value'
+                                $@"""{fieldName}""\s*:\s*[^\s,}}]+",    // "token": value
+                            };
+
+                            foreach (var pattern in patterns)
+                            {
+                                maskedResponse = System.Text.RegularExpressions.Regex.Replace(
+                                    maskedResponse,
+                                    pattern,
+                                    m => 
+                                    {
+                                        var match = m.Value;
+                                        var colonIndex = match.IndexOf(':');
+                                        var fieldPart = match.Substring(0, colonIndex + 1);
+                                        return $"{fieldPart} \"***\"";
+                                    },
+                                    System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                                );
+                            }
+                        }
+                    }
+                }
+
+                return maskedResponse;
+            }
+            catch (Exception)
+            {
+                return responseBody;
+            }
         }
     }
 }

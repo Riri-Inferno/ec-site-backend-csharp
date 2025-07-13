@@ -49,7 +49,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
                     context.Request.Body.Position = 0;
                 }
 
-                // GraphQLクエリをマスク
+                // リクエストのマスク
                 string maskedRequestBody = MaskSensitiveGraphQLRequest(requestBody);
 
                 // レスポンスキャプチャ
@@ -68,13 +68,17 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.Middlewares
 
                 var duration = DateTime.UtcNow - start;
 
+                // レスポンスのマスク（同じアセンブリを使用）
+                var targetAssembly = typeof(SignInInputType).Assembly;
+                var maskedResponseBody = MaskingUtil.MaskGraphQLResponse(responseBody, targetAssembly);
+
                 _logger.LogInformation(
                     "[GraphQL] TraceId={TraceId} Path={Path} Duration={Duration}ms\nRequest={RequestBody}\nResponse={ResponseBody}",
                     traceId,
                     context.Request.Path,
                     duration.TotalMilliseconds,
                     Truncate(maskedRequestBody, 2000),
-                    Truncate(responseBody, 2000)
+                    Truncate(maskedResponseBody, 2000)
                 );
             }
             else

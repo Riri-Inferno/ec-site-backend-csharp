@@ -1,3 +1,5 @@
+using EcSiteBackend.Application.Common.Attributes;
+
 namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types
 {
     /// <summary>
@@ -13,6 +15,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Types
         /// <summary>
         /// メールアドレス
         /// </summary>
+        [Sensitive("メールアドレスは機密情報です")]
         public string Email { get; set; } = string.Empty;
 
         /// <summary>
