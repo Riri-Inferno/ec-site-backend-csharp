@@ -29,6 +29,8 @@ namespace EcSiteBackend.Infrastructure.Services
             User user,
             OperationType operationType,
             Guid operatedBy,
+            string? ipAddress = null,
+            string? userAgent = null,
             CancellationToken cancellationToken = default)
         {
             var history = _mapper.Map<UserHistory>(user);
@@ -37,6 +39,8 @@ namespace EcSiteBackend.Infrastructure.Services
             history.OperationType = operationType;
             history.OperatedBy = operatedBy;
             history.OperatedAt = DateTime.UtcNow;
+            history.IpAddress = ipAddress;
+            history.UserAgent = userAgent;
 
             await _userHistoryRepository.AddAsync(history, cancellationToken);
             await _userHistoryRepository.SaveChangesAsync(cancellationToken);
