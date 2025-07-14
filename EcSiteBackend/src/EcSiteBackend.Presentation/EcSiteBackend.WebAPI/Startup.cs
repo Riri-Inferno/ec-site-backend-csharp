@@ -93,6 +93,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<IReadCurrentUserUseCase, ReadCurrentUserInteractor>();
             services.AddScoped<IChangePasswordUseCase, ChangePasswordInteractor>();
             services.AddScoped<IUpdateUserUseCase, UpdateUserInteractor>();
+            services.AddScoped<IRequestPasswordResetUseCase, RequestPasswordResetInteractor>();
 
             // 5. AutoMapper
             services.AddAutoMapper(cfg =>
