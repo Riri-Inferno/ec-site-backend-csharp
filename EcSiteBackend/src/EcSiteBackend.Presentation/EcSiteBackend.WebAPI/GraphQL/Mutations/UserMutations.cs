@@ -126,5 +126,42 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
             // ペイロードに詰めて返す
             return new CurrentUserInfoPayload { User = _mapper.Map<UserType>(result) };
         }
+
+        /// <summary>
+        /// パスワードを更新するMutation
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="updateUserUseCase"></param>
+        /// <param name="httpContextAccessor"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>更新後のユーザー情報</returns>
+        [Authorize]
+        public async Task<ChangePasswordPayload> ChangePassword(
+            ChangePasswordInputType input,
+            [Service] IChangePasswordUseCase changePasswordUseCase,
+            [Service] IHttpContextAccessor httpContextAccessor,
+            [GlobalState("currentUserId")] Guid? userId,
+            CancellationToken cancellationToken)
+        {
+            if (!userId.HasValue)
+            {
+                throw new UnauthorizedException(ErrorMessages.InvalidToken);
+            }
+
+            var changePasswordInput = new ChangePasswordInput
+            {
+                UserId = userId.Value,
+                CurrentPassword = input.CurrentPassword,
+                NewPassword = input.NewPassword,
+                ConfirmPassword = input.ConfirmPassword,
+                IpAddress = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
+                UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
+            };
+
+            await changePasswordUseCase.ExecuteAsync(changePasswordInput, cancellationToken);
+
+            // ペイロードを返す
+            return new ChangePasswordPayload();
+        }
     }
 }
