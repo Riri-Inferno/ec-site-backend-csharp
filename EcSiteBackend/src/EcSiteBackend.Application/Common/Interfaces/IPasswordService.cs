@@ -19,5 +19,12 @@ namespace EcSiteBackend.Application.Common.Interfaces
         /// <param name="passwordHash"></param>
         /// <returns></returns>
         bool VerifyPassword(string password, string passwordHash);
+
+        /// <summary>
+        /// パスワード強度チェック
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        bool IsPasswordStrong(string password);
     }
 }

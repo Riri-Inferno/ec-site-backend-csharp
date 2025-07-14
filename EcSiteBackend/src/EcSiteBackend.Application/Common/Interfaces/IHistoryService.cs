@@ -18,6 +18,13 @@ namespace EcSiteBackend.Application.Common.Interfaces.Services
         /// <param name="operatedBy"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task CreateUserHistoryAsync(User user, OperationType operationType, Guid operatedBy, CancellationToken cancellationToken = default);
+        Task CreateUserHistoryAsync(
+            User user,
+            OperationType operationType,
+            Guid operatedBy,
+            string? ipAddress = null,
+            string? userAgent = null,
+            CancellationToken cancellationToken = default
+        );
     }
 }

@@ -124,7 +124,7 @@ namespace EcSiteBackend.Application.UseCases.Interactors
             }
 
             // パスワード強度チェック
-            if (input.Password.Length < 8)
+            if (!_passwordService.IsPasswordStrong(input.Password))
             {
                 throw new ValidationException("password", ErrorMessages.PasswordTooWeak);
             }
