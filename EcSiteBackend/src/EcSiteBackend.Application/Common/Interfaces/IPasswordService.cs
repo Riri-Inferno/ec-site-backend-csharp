@@ -26,5 +26,18 @@ namespace EcSiteBackend.Application.Common.Interfaces
         /// <param name="password"></param>
         /// <returns></returns>
         bool IsPasswordStrong(string password);
+
+        /// <summary>
+        /// パスワードリセットトークンを生成
+        /// </summary>
+        /// <returns></returns>
+        string GenerateResetToken();
+        
+        /// <summary>
+        /// リセットトークンをハッシュ化
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        string HashToken(string token);
     }
 }

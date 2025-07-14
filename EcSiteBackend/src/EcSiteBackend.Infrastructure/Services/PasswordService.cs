@@ -1,5 +1,6 @@
-using BCrypt.Net;
 using EcSiteBackend.Application.Common.Interfaces;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace EcSiteBackend.Infrastructure.Services
 {
@@ -62,6 +63,36 @@ namespace EcSiteBackend.Infrastructure.Services
 
             // すべての要件を満たしているか確認
             return hasUpperCase && hasLowerCase && hasDigit;
+        }
+
+        /// <summary>
+        /// リセットトークンを生成
+        /// </summary>
+        /// <returns></returns>
+        public string GenerateResetToken()
+        {
+            using var rng = RandomNumberGenerator.Create();
+            var bytes = new byte[32];
+            rng.GetBytes(bytes);
+
+            // URLセーフなBase64エンコード
+            return Convert.ToBase64String(bytes)
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .Replace("=", "");
+        }
+
+        /// <summary>
+        /// リセットトークンをハッシュ化
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public string HashToken(string token)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(token);
+            var hash = sha256.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
         }
     }
 }
