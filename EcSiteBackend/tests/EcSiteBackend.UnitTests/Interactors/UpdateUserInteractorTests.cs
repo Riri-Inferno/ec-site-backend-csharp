@@ -128,8 +128,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
-                "1.11.1111",
-                "userAgent",
+                null,
+                null,
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -222,8 +222,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
-                "1.12.12",
-                "useragent",
+                null,
+                null,
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -317,8 +317,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
-                "1.12.1",
-                "userAgent",
+                null,
+                null,
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -414,8 +414,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
-                "1.12.2",
-                "userAgent",
+                null,
+                null,
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -510,8 +510,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
-                "1.23.45",
-                "userAgent",
+                null,
+                null,
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -557,8 +557,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                     u.Email == "old.email@example.com"),
                 OperationType.Update,
                 userId,
-                "1.23.45",
-                "userAgent",
+                null,
+                null,
                 It.IsAny<CancellationToken>()), Times.Once);
         }
 
