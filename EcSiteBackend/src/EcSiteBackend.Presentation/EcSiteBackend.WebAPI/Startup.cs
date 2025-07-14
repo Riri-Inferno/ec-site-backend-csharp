@@ -75,6 +75,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             // 2. Repositories
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IHistoryRepository<>), typeof(HistoryRepository<>));
+            services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
             // 3. Services
