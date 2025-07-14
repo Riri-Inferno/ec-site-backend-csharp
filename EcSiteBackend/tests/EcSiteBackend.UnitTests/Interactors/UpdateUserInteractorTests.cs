@@ -134,7 +134,89 @@ namespace EcSiteBackend.UnitTests.Interactors
         [Fact(DisplayName = "正常系:ユーザー情報（LastName）のみ更新できること")]
         public async Task UpdateUser_LastNameOnly_ShouldUpdateSuccessfully()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.NewGuid();
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+                LastName = "UpdatedLastName"
+            };
+
+            // 既存のユーザー
+            var existingUser = new User
+            {
+                Id = userId,
+                FirstName = "変更なし",
+                LastName = "OldLastName",
+                Email = "never.change@zmail.com",
+                PhoneNumber = "111-1111-1111",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                IsActive = true
+            };
+
+            // 期待される帰り値
+            var expectedUserDto = new UserDto
+            {
+                Id = userId,
+                FirstName = "変更なし",
+                LastName = "UpdatedLastName",
+                Email = "never.change@zmail.com",
+                PhoneNumber = "111-1111-1111"
+            };
+
+            // モックの設定
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()));
+
+            _userRepositoryMock
+                .Setup(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(1);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<UserDto>(It.IsAny<User>()))
+                .Returns(expectedUserDto);
+
+            _historyServiceMock
+                .Setup(service => service.CreateUserHistoryAsync(
+                    It.IsAny<User>(),
+                    It.IsAny<OperationType>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            // TransactionServiceのモックを修正
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task>, CancellationToken>(async (action, ct) =>
+                {
+                    await action();
+                });
+
+            // Act
+            var result = await _interactor.ExecuteAsync(input, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedUserDto.Id, result.Id);
+            Assert.Equal(expectedUserDto.FirstName, result.FirstName);
+
+            // 依存関係呼び出しの検証
+            _userRepositoryMock.Verify(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.Update(It.Is<User>(u =>
+                u.Id == userId &&
+                u.FirstName == "変更なし" &&
+                u.LastName == "UpdatedLastName")), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _historyServiceMock.Verify(service => service.CreateUserHistoryAsync(
+                It.IsAny<User>(),
+                OperationType.Update,
+                userId,
+                It.IsAny<CancellationToken>()), Times.Once);
+            _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
 
         [Fact(DisplayName = "正常系:ユーザー情報（PhoneNumber）のみ更新できること")]
