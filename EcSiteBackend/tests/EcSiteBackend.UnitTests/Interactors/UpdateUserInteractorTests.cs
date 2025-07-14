@@ -94,6 +94,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                     It.IsAny<User>(),
                     It.IsAny<OperationType>(),
                     It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -126,6 +128,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
+                "1.11.1111",
+                "userAgent",
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -184,6 +188,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                     It.IsAny<User>(),
                     It.IsAny<OperationType>(),
                     It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -216,6 +222,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
+                "1.12.12",
+                "useragent",
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -274,6 +282,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                     It.IsAny<User>(),
                     It.IsAny<OperationType>(),
                     It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -307,6 +317,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
+                "1.12.1",
+                "userAgent",
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -367,6 +379,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                     It.IsAny<User>(),
                     It.IsAny<OperationType>(),
                     It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -400,6 +414,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
+                "1.12.2",
+                "userAgent",
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -459,6 +475,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                     It.IsAny<User>(),
                     It.IsAny<OperationType>(),
                     It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -492,6 +510,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 OperationType.Update,
                 userId,
+                "1.23.45",
+                "userAgent",
                 It.IsAny<CancellationToken>()), Times.Once);
             _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
@@ -537,6 +557,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                     u.Email == "old.email@example.com"),
                 OperationType.Update,
                 userId,
+                "1.23.45",
+                "userAgent",
                 It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -736,6 +758,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                 It.IsAny<User>(),
                 It.IsAny<OperationType>(),
                 It.IsAny<Guid>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -773,6 +797,8 @@ namespace EcSiteBackend.UnitTests.Interactors
                     It.IsAny<User>(),
                     It.IsAny<OperationType>(),
                     It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<CancellationToken>()))
                 .Throws(new Exception("History service error"));
 

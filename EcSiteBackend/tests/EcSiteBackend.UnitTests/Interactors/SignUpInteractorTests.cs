@@ -64,7 +64,7 @@ namespace EcSiteBackend.UnitTests.Interactors
             var input = new SignUpInput
             {
                 Email = "test@example.com",
-                Password = "SecurePassword123",
+                Password = "SecurePassword123huw3ga9wpjjg0wg4",
                 FirstName = "太郎",
                 LastName = "テスト",
                 PhoneNumber = "090-9999-9999",
@@ -135,6 +135,10 @@ namespace EcSiteBackend.UnitTests.Interactors
             _jwtServiceMock
                 .Setup(j => j.GenerateToken(It.IsAny<User>()))
                 .Returns(expectedToken);
+            
+            _passwordServiceMock
+                .Setup(s => s.IsPasswordStrong(It.IsAny<string>()))
+                .Returns(true);
 
             // Mapping
             _mapperMock
