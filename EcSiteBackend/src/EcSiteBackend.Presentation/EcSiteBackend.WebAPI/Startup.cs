@@ -83,6 +83,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddSingleton<IUserAgentParser, UserAgentParser>();
             services.AddScoped<IHistoryService, HistoryService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddHttpContextAccessor();
 
             // 4. UseCases
