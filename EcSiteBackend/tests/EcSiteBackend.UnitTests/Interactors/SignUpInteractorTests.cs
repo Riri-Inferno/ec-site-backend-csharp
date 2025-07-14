@@ -135,7 +135,7 @@ namespace EcSiteBackend.UnitTests.Interactors
             _jwtServiceMock
                 .Setup(j => j.GenerateToken(It.IsAny<User>()))
                 .Returns(expectedToken);
-            
+
             _passwordServiceMock
                 .Setup(s => s.IsPasswordStrong(It.IsAny<string>()))
                 .Returns(true);
@@ -257,6 +257,7 @@ namespace EcSiteBackend.UnitTests.Interactors
             _mapperMock.Verify(m => m.Map<UserDto>(It.IsAny<User>()), Times.Once);
             _userAgentParserMock.Verify(p => p.GetBrowser(It.IsAny<string>()), Times.Once);
             _userAgentParserMock.Verify(p => p.GetDeviceInfo(It.IsAny<string>()), Times.Once);
+            _passwordServiceMock.Verify(p => p.IsPasswordStrong(It.IsAny<string>()), Times.Once);
         }
         
         [Fact(DisplayName = "異常系: メールアドレスが既に存在する場合、ConflictExceptionがスローされる")]
