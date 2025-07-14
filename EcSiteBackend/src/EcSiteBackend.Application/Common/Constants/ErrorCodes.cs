@@ -30,5 +30,9 @@ namespace EcSiteBackend.Application.Common.Constants
 
         // 権限
         public const string BusinessRuleViolation = "BUSINESS_RULE_VIOLATION";
+
+        // パスワード
+        public const string PasswordMismatch = "PASSWORD_MISMATCH";
+        public const string SameAsCurrentPassword = "SAME_AS_CURRENT_PASSWORD";
     }
 }
