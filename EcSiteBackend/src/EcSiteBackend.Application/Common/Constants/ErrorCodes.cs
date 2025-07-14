@@ -12,6 +12,7 @@ namespace EcSiteBackend.Application.Common.Constants
         public const string Unauthorized = "UNAUTHORIZED";
         public const string Forbidden = "FORBIDDEN";
         public const string InternalError = "INTERNAL_ERROR";
+        public const string InvalidArguments = "INVALID_ARGUMENTS";
 
         // ユーザー関連
         public const string UserNotFound = "USER_NOT_FOUND";
