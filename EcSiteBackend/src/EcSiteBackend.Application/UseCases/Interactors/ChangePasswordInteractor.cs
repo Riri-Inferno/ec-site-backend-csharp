@@ -132,7 +132,10 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                         originalUser,
                         OperationType.Update,
                         input.UserId,
-                        cancellationToken);
+                        input.IpAddress,
+                        input.UserAgent,
+                        cancellationToken
+                        );
                 }
                 catch (Exception ex)
                 {

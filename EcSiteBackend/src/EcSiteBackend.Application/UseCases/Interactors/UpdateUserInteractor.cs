@@ -84,6 +84,8 @@ namespace EcSiteBackend.Application.UseCases.Interactors
                     originalUser,
                     OperationType.Update,
                     input.Id,
+                    input.IpAddress,
+                    input.UserAgent,
                     cancellationToken);
             }, cancellationToken);
 
