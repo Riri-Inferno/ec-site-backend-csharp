@@ -7,10 +7,7 @@ using EcSiteBackend.Application.UseCases.InputOutputModels;
 using EcSiteBackend.Domain.Entities;
 using EcSiteBackend.Application.DTOs;
 using EcSiteBackend.Application.Common.Exceptions;
-using EcSiteBackend.Application.Common.Constants;
 using EcSiteBackend.Application.Common.Interfaces.Services;
-using Microsoft.Extensions.Options;
-using EcSiteBackend.Application.Common.Settings;
 using EcSiteBackend.Domain.Enums;
 
 namespace EcSiteBackend.UnitTests.Interactors
@@ -115,6 +112,8 @@ namespace EcSiteBackend.UnitTests.Interactors
             Assert.NotNull(result);
             Assert.Equal(expectedUserDto.Id, result.Id);
             Assert.Equal(expectedUserDto.FirstName, result.FirstName);
+            Assert.Equal(expectedUserDto.LastName, result.LastName);
+            Assert.Equal(expectedUserDto.PhoneNumber, result.PhoneNumber);
 
             // 依存関係呼び出しの検証
             _userRepositoryMock.Verify(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
@@ -203,6 +202,8 @@ namespace EcSiteBackend.UnitTests.Interactors
             Assert.NotNull(result);
             Assert.Equal(expectedUserDto.Id, result.Id);
             Assert.Equal(expectedUserDto.FirstName, result.FirstName);
+            Assert.Equal(expectedUserDto.LastName, result.LastName);
+            Assert.Equal(expectedUserDto.PhoneNumber, result.PhoneNumber);
 
             // 依存関係呼び出しの検証
             _userRepositoryMock.Verify(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
@@ -291,6 +292,8 @@ namespace EcSiteBackend.UnitTests.Interactors
             Assert.NotNull(result);
             Assert.Equal(expectedUserDto.Id, result.Id);
             Assert.Equal(expectedUserDto.FirstName, result.FirstName);
+            Assert.Equal(expectedUserDto.LastName, result.LastName);
+            Assert.Equal(expectedUserDto.PhoneNumber, result.PhoneNumber);
 
             // 依存関係呼び出しの検証
             _userRepositoryMock.Verify(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
@@ -311,31 +314,321 @@ namespace EcSiteBackend.UnitTests.Interactors
         [Fact(DisplayName = "正常系:複数フィールドを同時に更新できること")]
         public async Task UpdateUser_MultipleFields_ShouldUpdateSuccessfully()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.NewGuid();
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+                FirstName = "UpdatedFirstName",
+                LastName = "UpdatedLastName",
+                PhoneNumber = "222-2222-2222"
+            };
+
+            // 既存のユーザー
+            var existingUser = new User
+            {
+                Id = userId,
+                FirstName = "John",
+                LastName = "Doe",
+                Email = "never.change@zmail.com",
+                PhoneNumber = "111-1111-1111",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                IsActive = true
+            };
+
+            // 期待される帰り値
+            var expectedUserDto = new UserDto
+            {
+                Id = userId,
+                FirstName = "UpdatedFirstName",
+                LastName = "UpdatedLastName",
+                Email = "never.change@zmail.com",
+                PhoneNumber = "222-2222-2222"
+            };
+
+            // モックの設定
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()));
+
+            _userRepositoryMock
+                .Setup(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(1);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<UserDto>(It.IsAny<User>()))
+                .Returns(expectedUserDto);
+
+            _historyServiceMock
+                .Setup(service => service.CreateUserHistoryAsync(
+                    It.IsAny<User>(),
+                    It.IsAny<OperationType>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            // TransactionServiceのモックを修正
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task>, CancellationToken>(async (action, ct) =>
+                {
+                    await action();
+                });
+
+            // Act
+            var result = await _interactor.ExecuteAsync(input, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedUserDto.Id, result.Id);
+            Assert.Equal(expectedUserDto.FirstName, result.FirstName);
+            Assert.Equal(expectedUserDto.LastName, result.LastName);
+            Assert.Equal(expectedUserDto.PhoneNumber, result.PhoneNumber);
+
+            // 依存関係呼び出しの検証
+            _userRepositoryMock.Verify(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.Update(It.Is<User>(u =>
+                u.Id == userId &&
+                u.FirstName == "UpdatedFirstName" &&
+                u.LastName == "UpdatedLastName" &&
+                u.PhoneNumber == "222-2222-2222")), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _historyServiceMock.Verify(service => service.CreateUserHistoryAsync(
+                It.IsAny<User>(),
+                OperationType.Update,
+                userId,
+                It.IsAny<CancellationToken>()), Times.Once);
+            _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
 
         [Fact(DisplayName = "正常系:空文字列/nullの場合は既存値が保持されること")]
         public async Task UpdateUser_EmptyOrNullInput_ShouldKeepExistingValues()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.NewGuid();
+
+            // 更新なし
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+            };
+
+            // 既存のユーザー
+            var existingUser = new User
+            {
+                Id = userId,
+                FirstName = "John",
+                LastName = "Doe",
+                Email = "never.change@zmail.com",
+                PhoneNumber = "111-1111-1111",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                IsActive = true
+            };
+
+            // 期待される帰り値
+            var expectedUserDto = new UserDto
+            {
+                Id = userId,
+                FirstName = "John",
+                LastName = "Doe",
+                Email = "never.change@zmail.com",
+                PhoneNumber = "111-1111-1111"
+            };
+
+            // モックの設定
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()));
+
+            _userRepositoryMock
+                .Setup(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(1);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<UserDto>(It.IsAny<User>()))
+                .Returns(expectedUserDto);
+
+            _historyServiceMock
+                .Setup(service => service.CreateUserHistoryAsync(
+                    It.IsAny<User>(),
+                    It.IsAny<OperationType>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            // TransactionServiceのモックを修正
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task>, CancellationToken>(async (action, ct) =>
+                {
+                    await action();
+                });
+
+            // Act
+            var result = await _interactor.ExecuteAsync(input, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedUserDto.Id, result.Id);
+            Assert.Equal(expectedUserDto.FirstName, result.FirstName);
+            Assert.Equal(expectedUserDto.LastName, result.LastName);
+            Assert.Equal(expectedUserDto.PhoneNumber, result.PhoneNumber);
+
+            // 依存関係呼び出しの検証
+            _userRepositoryMock.Verify(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.Update(It.Is<User>(u =>
+                u.Id == userId &&
+                u.FirstName == "John" &&
+                u.LastName == "Doe" &&
+                u.PhoneNumber == "111-1111-1111")), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _historyServiceMock.Verify(service => service.CreateUserHistoryAsync(
+                It.IsAny<User>(),
+                OperationType.Update,
+                userId,
+                It.IsAny<CancellationToken>()), Times.Once);
+            _mapperMock.Verify(mapper => mapper.Map<UserDto>(It.IsAny<User>()), Times.Once);
         }
 
         [Fact(DisplayName = "正常系:更新履歴が正しく作成されること")]
         public async Task UpdateUser_ShouldCreateHistory()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.NewGuid();
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+                FirstName = "NewFirstName",
+                Email = "new.email@example.com"
+            };
+
+            var existingUser = new User
+            {
+                Id = userId,
+                FirstName = "OldFirstName",
+                LastName = "TestLastName",
+                Email = "old.email@example.com",
+                PhoneNumber = "090-1234-5678",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                IsActive = true
+            };
+
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingUser);
+
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task>, CancellationToken>(async (action, ct) => await action());
+
+            // Act
+            await _interactor.ExecuteAsync(input, CancellationToken.None);
+
+            // Assert - 履歴サービスが正しいパラメータで呼ばれたことを確認
+            _historyServiceMock.Verify(service => service.CreateUserHistoryAsync(
+                It.Is<User>(u => 
+                    u.FirstName == "OldFirstName" && 
+                    u.Email == "old.email@example.com"),
+                OperationType.Update,
+                userId,
+                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact(DisplayName = "正常系:監査情報（UpdatedAt/UpdatedBy）が設定されること")]
         public async Task UpdateUser_ShouldSetAuditFields()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.NewGuid();
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+                FirstName = "NewFirstName"
+            };
+
+            var existingUser = new User
+            {
+                Id = userId,
+                FirstName = "OldFirstName",
+                LastName = "TestLastName",
+                Email = "test@example.com",
+                PhoneNumber = "090-1234-5678",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                IsActive = true
+            };
+
+            User updatedUser = null!;
+
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()))
+                .Callback<User>(u => updatedUser = u);
+
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task>, CancellationToken>(async (action, ct) => await action());
+
+            // Act
+            await _interactor.ExecuteAsync(input, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(updatedUser);
+            Assert.NotNull(updatedUser.UpdatedAt);
+            Assert.Equal(userId, updatedUser.UpdatedBy);
+            Assert.True(updatedUser.UpdatedAt > existingUser.CreatedAt);
         }
 
-        [Fact(DisplayName = "正常系:トランザクション内で処理が実行されること")]
-        public async Task UpdateUser_ShouldExecuteWithinTransaction()
+        [Fact(DisplayName = "正常系:TransactionServiceのExecuteAsyncメソッドが呼ばれること")]
+        public async Task UpdateUser_ShouldCallTransactionService()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.NewGuid();
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+                FirstName = "NewFirstName"
+            };
+
+            var existingUser = new User
+            {
+                Id = userId,
+                FirstName = "OldFirstName",
+                LastName = "TestLastName",
+                Email = "test@example.com",
+                PhoneNumber = "090-1234-5678",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                IsActive = true
+            };
+
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingUser);
+
+            var transactionExecuted = false;
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task>, CancellationToken>(async (action, ct) => 
+                {
+                    transactionExecuted = true;
+                    await action();
+                });
+
+            // Act
+            await _interactor.ExecuteAsync(input, CancellationToken.None);
+
+            // Assert
+            Assert.True(transactionExecuted);
+            _transactionServiceMock.Verify(
+                t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()), 
+                Times.Once);
         }
 
         [Fact(DisplayName = "異常系:存在しないユーザーIDの場合、NotFoundExceptionがスローされること")]
