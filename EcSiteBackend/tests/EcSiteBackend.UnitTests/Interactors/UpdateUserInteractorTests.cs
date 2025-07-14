@@ -231,16 +231,106 @@ namespace EcSiteBackend.UnitTests.Interactors
             _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
-        [Fact(DisplayName = "異常系:リポジトリでエラーが発生した場合、トランザクションがロールバックされること")]
-        public async Task UpdateUser_RepositoryError_ShouldRollbackTransaction()
+        [Fact(DisplayName = "異常系:リポジトリのUpdate時にエラーが発生した場合、後続処理がスキップされること")]
+        public async Task UpdateUser_RepositoryUpdateError_ShouldSkipSubsequentOperations()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.NewGuid();
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+                FirstName = "ErrorFirstName"
+            };
+
+            var existingUser = new User
+            {
+                Id = userId,
+                FirstName = "OldFirstName",
+                LastName = "変更なし",
+                Email = "never.change@zmail.com",
+                PhoneNumber = "111-1111-1111",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                IsActive = true
+            };
+
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()))
+                .Throws(new Exception("Repository update error"));
+
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task>, CancellationToken>(async (action, ct) =>
+                {
+                    await action();
+                });
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<Exception>(() => _interactor.ExecuteAsync(input, CancellationToken.None));
+            Assert.Equal("Repository update error", ex.Message);
+
+            // SaveChangesAsyncや履歴サービスは呼ばれないこと
+            _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+            _historyServiceMock.Verify(service => service.CreateUserHistoryAsync(
+                It.IsAny<User>(),
+                It.IsAny<OperationType>(),
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()), Times.Never);
         }
 
-        [Fact(DisplayName = "異常系:履歴サービスでエラーが発生した場合、トランザクションがロールバックされること")]
-        public async Task UpdateUser_HistoryServiceError_ShouldRollbackTransaction()
+        [Fact(DisplayName = "異常系:履歴サービスでエラーが発生した場合、例外が伝播すること")]
+        public async Task UpdateUser_HistoryServiceError_ShouldPropagateException()
         {
-            // TODO: 実装
+            // Arrange
+            var userId = Guid.NewGuid();
+            var input = new UpdateUserInput
+            {
+                Id = userId,
+                FirstName = "ErrorFirstName"
+            };
+
+            var existingUser = new User
+            {
+                Id = userId,
+                FirstName = "OldFirstName",
+                LastName = "変更なし",
+                Email = "never.change@zmail.com",
+                PhoneNumber = "111-1111-1111",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                IsActive = true
+            };
+
+            _userRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()));
+
+            _historyServiceMock
+                .Setup(service => service.CreateUserHistoryAsync(
+                    It.IsAny<User>(),
+                    It.IsAny<OperationType>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<CancellationToken>()))
+                .Throws(new Exception("History service error"));
+
+            _transactionServiceMock
+                .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<Task>, CancellationToken>(async (action, ct) =>
+                {
+                    await action();
+                });
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<Exception>(() => _interactor.ExecuteAsync(input, CancellationToken.None));
+            Assert.Equal("History service error", ex.Message);
+
+            // SaveChangesAsyncは呼ばれる
+            _userRepositoryMock.Verify(repo => repo.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
