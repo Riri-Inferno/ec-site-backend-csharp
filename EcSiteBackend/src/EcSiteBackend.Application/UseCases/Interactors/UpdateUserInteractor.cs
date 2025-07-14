@@ -43,6 +43,12 @@ namespace EcSiteBackend.Application.UseCases.Interactors
         /// </summary>
         public async Task<UserDto> ExecuteAsync(UpdateUserInput input, CancellationToken cancellationToken)
         {
+            // input内のIDが空の場合は例外をスロー
+            if (input.Id == Guid.Empty)
+            {
+                throw new InvalidArgumentsException("User ID", input.Id);
+            }
+
             var user = new User();
 
             await _transactionService.ExecuteAsync(async () =>

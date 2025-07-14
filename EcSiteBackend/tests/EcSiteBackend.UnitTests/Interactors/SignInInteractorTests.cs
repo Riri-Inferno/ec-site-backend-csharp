@@ -11,7 +11,7 @@ using EcSiteBackend.Application.Common.Constants;
 using Microsoft.Extensions.Options;
 using EcSiteBackend.Application.Common.Settings;
 
-namespace EcSiteBackend.Interactors.UnitTests
+namespace EcSiteBackend.UnitTests.Interactors
 {
     /// <summary>
     /// ユーザー認証（サインイン）ユースケースのテストクラス
@@ -55,7 +55,6 @@ namespace EcSiteBackend.Interactors.UnitTests
         }
 
         [Fact(DisplayName ="正常系: 入力が有効な場合、ログイン履歴が作成され、トークンが帰る")]
-
         public async Task SignIn_ShouldCreateLoginHistoryAndReturnToken_WhenInputIsValid()
         {
             // Arrange

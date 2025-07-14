@@ -9,7 +9,7 @@ namespace EcSiteBackend.Application.Common.Constants
         public const string ValidationError = "入力内容に誤りがあります。";
         public const string NotFound = "{0} (ID: {1}) が見つかりません。";
         public const string InternalError = "システムエラーが発生しました。";
-
+        public const string InvalidArguments = "無効な引数が指定されたか、必須の引数が不足しています。";
         // ユーザー関連
         public const string EmailAlreadyExists = "このメールアドレスは既に使用されています。";
         public const string InvalidCredentials = "メールアドレスまたはパスワードが正しくありません。";
