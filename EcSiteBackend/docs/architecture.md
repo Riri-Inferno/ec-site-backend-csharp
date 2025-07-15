@@ -165,6 +165,66 @@ sequenceDiagram
     end
 ```
 
+#### パスワードリセットフロー
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant GraphQL
+    participant RequestPasswordResetUseCase
+    participant UserRepository
+    participant PasswordResetTokenRepository
+    participant EmailService
+    participant Database
+
+    Client->>GraphQL: requestPasswordReset(email)
+    GraphQL->>RequestPasswordResetUseCase: ExecuteAsync(email)
+    RequestPasswordResetUseCase->>UserRepository: GetByEmailAsync(email)
+    UserRepository->>Database: SELECT * FROM users WHERE email = ?
+    Database-->>UserRepository: User or null
+    alt ユーザーが存在しない
+        RequestPasswordResetUseCase-->>GraphQL: NotFoundException
+    else
+        RequestPasswordResetUseCase->>PasswordResetTokenRepository: GenerateToken(userId)
+        PasswordResetTokenRepository->>Database: INSERT INTO password_reset_tokens ...
+        RequestPasswordResetUseCase->>EmailService: SendPasswordResetEmail(email, resetToken)
+        EmailService-->>RequestPasswordResetUseCase: Success
+        RequestPasswordResetUseCase-->>GraphQL: Success
+        GraphQL-->>Client: Success
+    end
+```
+
+#### パスワード変更フロー（通常）
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant GraphQL
+    participant ChangePasswordUseCase
+    participant UserRepository
+    participant PasswordService
+    participant Database
+
+    Client->>GraphQL: changePassword(currentPassword, newPassword)
+    Note over Client,GraphQL: 要認証（JWT必須）
+    GraphQL->>ChangePasswordUseCase: ExecuteAsync(userId, input)
+    ChangePasswordUseCase->>UserRepository: GetByIdAsync(userId)
+    UserRepository->>Database: SELECT * FROM users WHERE id = ?
+    Database-->>UserRepository: User
+
+    ChangePasswordUseCase->>PasswordService: VerifyPassword(currentPassword, hash)
+    alt 現在のパスワードが不一致
+        ChangePasswordUseCase-->>GraphQL: UnauthorizedException
+    else パスワード検証成功
+        ChangePasswordUseCase->>PasswordService: HashPassword(newPassword)
+        PasswordService-->>ChangePasswordUseCase: hashedPassword
+        ChangePasswordUseCase->>UserRepository: UpdatePasswordAsync(userId, hashedPassword)
+        UserRepository->>Database: UPDATE users SET password_hash = ? WHERE id = ?
+        ChangePasswordUseCase-->>GraphQL: Success
+        GraphQL-->>Client: Success
+    end
+```
+
 ### JWT トークン構造
 
 JWT トークンには以下のクレームが含まれる：
@@ -215,6 +275,7 @@ JWT トークンには以下のクレームが含まれる：
 ### カスタム例外階層
 
 ```
+
 ApplicationException (基底クラス)
 ├── ValidationException - バリデーションエラー
 ├── NotFoundException - リソース未発見
@@ -222,6 +283,7 @@ ApplicationException (基底クラス)
 ├── UnauthorizedException - 認証エラー
 ├── ForbiddenException - 認可エラー
 └── BusinessRuleException - ビジネスルール違反
+
 ```
 
 ### エラーレスポンス形式
@@ -318,3 +380,7 @@ dotnet test tests/EcSiteBackend.IntegrationTests
 - JWT 設定（Secret、Issuer、Audience、有効期限）
 
 本番環境では環境変数または適切なシークレット管理サービスを使用すること。
+
+```
+
+```
