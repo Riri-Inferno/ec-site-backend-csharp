@@ -75,6 +75,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             // 2. Repositories
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IHistoryRepository<>), typeof(HistoryRepository<>));
+            services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
             // 3. Services
@@ -83,6 +84,7 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddSingleton<IUserAgentParser, UserAgentParser>();
             services.AddScoped<IHistoryService, HistoryService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddHttpContextAccessor();
 
             // 4. UseCases
@@ -91,6 +93,8 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI
             services.AddScoped<IReadCurrentUserUseCase, ReadCurrentUserInteractor>();
             services.AddScoped<IChangePasswordUseCase, ChangePasswordInteractor>();
             services.AddScoped<IUpdateUserUseCase, UpdateUserInteractor>();
+            services.AddScoped<IRequestPasswordResetUseCase, RequestPasswordResetInteractor>();
+            services.AddScoped<IResetPasswordUseCase, ResetPasswordInteractor>();
 
             // 5. AutoMapper
             services.AddAutoMapper(cfg =>

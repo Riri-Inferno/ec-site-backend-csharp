@@ -34,5 +34,11 @@ namespace EcSiteBackend.Application.Common.Constants
         public const string PasswordTooShort = "パスワードは8文字以上である必要があります。";
         public const string UserNotFound = "ユーザーが見つかりません。";
         public const string WeakPassword = "パスワードは8文字以上で、大文字・小文字・数字を含む必要があります。";
+
+        // パスワードリセット
+        public const string ResetTokenInvalidOrExpired = "リセットトークンが無効か期限切れです";
+        public const string AccountInactive = "このアカウントは無効です";
+        public const string ResetTokenRequired = "リセットトークンは必須です";
+        public const string NewPasswordRequired = "新しいパスワードは必須です";
     }
 }
