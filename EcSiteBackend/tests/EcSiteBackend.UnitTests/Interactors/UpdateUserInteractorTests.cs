@@ -99,7 +99,7 @@ namespace EcSiteBackend.UnitTests.Interactors
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            // TransactionServiceのモックを修正
+            // TransactionServiceのモック
             _transactionServiceMock
                 .Setup(t => t.ExecuteAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>()))
                 .Returns<Func<Task>, CancellationToken>(async (action, ct) =>
