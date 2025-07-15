@@ -194,5 +194,37 @@ namespace EcSiteBackend.Presentation.EcSiteBackend.WebAPI.GraphQL.Mutations
                 Message = "メールアドレスが登録されている場合は、パスワードリセット用のリンクを送信しました。"
             };
         }
+
+        /// <summary>
+        /// パスワードをリセットするMutation
+        /// </summary>
+        /// <param name="input">トークンと新しいパスワード</param>
+        /// <param name="resetPasswordUseCase">パスワードリセット実行ユースケース</param>
+        /// <param name="httpContextAccessor">HTTPコンテキストアクセサ</param>
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        /// <returns>処理結果</returns>
+        public async Task<ResetPasswordPayload> ResetPassword(
+            ResetPasswordInputType input,
+            [Service] IResetPasswordUseCase resetPasswordUseCase,
+            [Service] IHttpContextAccessor httpContextAccessor,
+            CancellationToken cancellationToken)
+        {
+            var resetInput = new ResetPasswordInput
+            {
+                Token = input.Token,
+                NewPassword = input.NewPassword,
+                ConfirmPassword = input.ConfirmPassword,
+                IpAddress = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
+                UserAgent = httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString()
+            };
+
+            await resetPasswordUseCase.ExecuteAsync(resetInput, cancellationToken);
+
+            return new ResetPasswordPayload
+            {
+                Success = true,
+                Message = "パスワードが正常にリセットされました。新しいパスワードでログインしてください。"
+            };
+        }
     }
 }
